@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useTranslation } from "gatsby-plugin-react-i18next";
+import { initModelerWorkspace } from "../blockly/workspace";
 
 const Sidebar = () => {
   const { t } = useTranslation();
@@ -35,6 +36,12 @@ const Sidebar = () => {
 
 const Canvas = () => {
   const { t } = useTranslation();
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    initModelerWorkspace(containerRef.current);
+  }, []);
 
   return (
     <div className="dhc-panel">
@@ -45,9 +52,12 @@ const Canvas = () => {
         <span className="dhc-panel-tag">Blockly</span>
       </div>
       <div className="dhc-panel-body">
-        <div className="dhc-canvas-area" id="blocklyArea">
+        <div className="dhc-canvas-area">
           <span className="dhc-canvas-label">Workspace</span>
-          <span>{t("workspace.canvas.help")}</span>
+          <div
+            ref={containerRef}
+            style={{ width: "100%", height: "100%" }}
+          />
         </div>
       </div>
     </div>
