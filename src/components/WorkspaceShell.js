@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useTranslation } from "gatsby-plugin-react-i18next";
-import { initModelerWorkspace } from "../blockly/workspace";
+import { initModelerWorkspace, exportWorkspaceJson } from "../blockly/workspace";
 
 const Sidebar = () => {
   const { t } = useTranslation();
@@ -34,14 +34,22 @@ const Sidebar = () => {
   );
 };
 
-const Canvas = () => {
+const Canvas = ({ onSelectionChange }) => {
   const { t } = useTranslation();
   const containerRef = React.useRef(null);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    initModelerWorkspace(containerRef.current);
-  }, []);
+    initModelerWorkspace(containerRef.current, { onSelectionChange });
+  }, [onSelectionChange]);
+
+  const handleExport = () => {
+    const json = exportWorkspaceJson();
+    // For now, log to console
+    // eslint-disable-next-line no-console
+    console.log("DHC Modeler workspace export:", json);
+    alert("Workspace exported to console (see DevTools).");
+  };
 
   return (
     <div className="dhc-panel">
@@ -59,13 +67,37 @@ const Canvas = () => {
             style={{ width: "100%", height: "100%" }}
           />
         </div>
+        <div style={{ marginTop: "0.6rem", textAlign: "right" }}>
+          <button
+            type="button"
+            onClick={handleExport}
+            style={{
+              fontSize: "0.75rem",
+              padding: "0.25rem 0.6rem",
+              borderRadius: "999px",
+              border: "1px solid rgba(34,197,94,0.6)",
+              background: "rgba(22,163,74,0.12)",
+              color: "#bbf7d0",
+              cursor: "pointer",
+            }}
+          >
+            Export workspace (console)
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-const Inspector = () => {
+const Inspector = ({ selectedBlock }) => {
   const { t } = useTranslation();
+
+  const label = selectedBlock?.getFieldValue("LABEL") || "";
+  const iri =
+    selectedBlock?.getFieldValue("IRI") ||
+    selectedBlock?.getFieldValue("BASE") ||
+    "";
+  const comment = selectedBlock?.getFieldValue("COMMENT") || "";
 
   return (
     <div className="dhc-panel">
@@ -82,15 +114,17 @@ const Inspector = () => {
           <input
             className="dhc-inspector-input"
             type="text"
-            placeholder="Class / property label"
+            value={label}
+            readOnly
           />
         </div>
         <div className="dhc-inspector-field">
-          <div className="dhc-inspector-label">IRI</div>
+          <div className="dhc-inspector-label">IRI / Base</div>
           <input
             className="dhc-inspector-input"
             type="text"
-            placeholder="https://digitalhome.cloud/schema/core#Class"
+            value={iri}
+            readOnly
           />
         </div>
         <div className="dhc-inspector-field">
@@ -98,7 +132,8 @@ const Inspector = () => {
           <input
             className="dhc-inspector-input"
             type="text"
-            placeholder="Short description"
+            value={comment}
+            readOnly
           />
         </div>
       </div>
@@ -108,14 +143,15 @@ const Inspector = () => {
 
 const WorkspaceShell = () => {
   const { t } = useTranslation();
+  const [selectedBlock, setSelectedBlock] = React.useState(null);
 
   return (
     <section>
       <h2 className="dhc-section-title">{t("section.workspace")}</h2>
       <div className="dhc-workspace">
         <Sidebar />
-        <Canvas />
-        <Inspector />
+        <Canvas onSelectionChange={setSelectedBlock} />
+        <Inspector selectedBlock={selectedBlock} />
       </div>
     </section>
   );

@@ -82,7 +82,7 @@ Blockly.Blocks["dhc_data_property"] = {
 };
 
 /**
- * DHC EquipmentType block (shortcut for common DHC pattern)
+ * DHC EquipmentType block
  */
 Blockly.Blocks["dhc_equipment_type"] = {
   init: function () {

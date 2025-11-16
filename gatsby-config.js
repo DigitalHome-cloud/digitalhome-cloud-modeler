@@ -2,6 +2,8 @@ module.exports = {
   siteMetadata: {
     title: `DHC Modeler`,
     siteUrl: `https://modeler.digitalhome.cloud`,
+    description: `Your launchpad for designing, managing and operating smart homes.`,
+    author: `D-LAB-5`
   },
   plugins: [
     // Keep your existing Gatsby plugins here (image, sharp, etc.) when merging.
