@@ -1,8 +1,8 @@
+// src/blockly/blocks/dhc.js
 import * as Blockly from "blockly";
 
-/**
- * DHC Class block
- */
+console.log("[DHC] Loading block definitions. Blockly.VERSION =", Blockly.VERSION);
+
 Blockly.Blocks["dhc_class"] = {
   init: function () {
     this.appendDummyInput()
@@ -26,9 +26,6 @@ Blockly.Blocks["dhc_class"] = {
   },
 };
 
-/**
- * DHC Object Property block
- */
 Blockly.Blocks["dhc_object_property"] = {
   init: function () {
     this.appendDummyInput()
@@ -52,9 +49,6 @@ Blockly.Blocks["dhc_object_property"] = {
   },
 };
 
-/**
- * DHC Data Property block
- */
 Blockly.Blocks["dhc_data_property"] = {
   init: function () {
     this.appendDummyInput()
@@ -81,9 +75,6 @@ Blockly.Blocks["dhc_data_property"] = {
   },
 };
 
-/**
- * DHC EquipmentType block
- */
 Blockly.Blocks["dhc_equipment_type"] = {
   init: function () {
     this.appendDummyInput()
@@ -104,3 +95,8 @@ Blockly.Blocks["dhc_equipment_type"] = {
     this.setOutput(true, "Class");
   },
 };
+
+console.log(
+  "[DHC] Blocks registered:",
+  Object.keys(Blockly.Blocks).filter((k) => k.startsWith("dhc_"))
+);

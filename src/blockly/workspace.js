@@ -1,11 +1,33 @@
 // src/blockly/workspace.js
-import * as Blockly from "blockly";          // or "blockly/core", but same as in dhc.js
-import "blockly/blocks";                     // optional, for built-in blocks
+import * as Blockly from "blockly";
 import { dhcToolbox } from "./toolbox";
-import "./blocks/dhc";
+import "./blocks/dhc"; // 👈 important: this executes block definitions
 
 let workspaceRef = null;
 let selectionCallback = null;
+
+
+// // 1. Define your custom block
+// Blockly.Blocks['my_custom_block'] = {
+//   init: function() {
+//     this.appendDummyInput()
+//         .appendField("Hello, world!");
+//     this.setColour(160);
+//     this.setTooltip("");
+//     this.setHelpUrl("");
+//   }
+// };
+
+// // 2. Define the toolbox using JSON, referencing the 'my_custom_block' type
+// const dhcToolbox2 = {
+//   "kind": "flyoutToolbox",
+//   "contents": [
+//     {
+//       "kind": "block",
+//       "type": "my_custom_block" // This links to the definition in Blockly.Blocks
+//     }
+//   ]
+// };
 
 export function initModelerWorkspace(container, options = {}) {
   if (!container) return null;
@@ -23,7 +45,7 @@ export function initModelerWorkspace(container, options = {}) {
   console.log("DHC toolbox JSON:", dhcToolbox);
 
   workspaceRef = Blockly.inject(container, {
-    toolbox: dhcToolbox, // 👈 JSON toolbox here
+    toolbox: dhcToolbox,   // JSON toolbox
     trashcan: true,
     grid: {
       spacing: 20,
@@ -41,6 +63,7 @@ export function initModelerWorkspace(container, options = {}) {
   });
 
   console.log("Workspace after inject:", workspaceRef);
+  console.log("Registered DHC blocks:", Object.keys(Blockly.Blocks).filter(k => k.startsWith("dhc_")));
 
   workspaceRef.addChangeListener((event) => {
     if (!selectionCallback) return;
