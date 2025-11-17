@@ -1,34 +1,65 @@
-// src/blockly/workspace.js
 import * as Blockly from "blockly";
 import { dhcToolbox } from "./toolbox";
-import "./blocks/dhc"; // 👈 important: this executes block definitions
+import "./blocks/dhc";
 
 let workspaceRef = null;
 let selectionCallback = null;
 
+// 🌙 DHC Dark Theme
+const dhcTheme = Blockly.Theme.defineTheme("dhcTheme", {
+  base: Blockly.Themes.Classic,
+  blockStyles: {
+    dhc_class_block: {
+      colourPrimary: "#22c55e",   // green
+      colourSecondary: "#16a34a",
+      colourTertiary: "#052e16",
+    },
+    dhc_object_property_block: {
+      colourPrimary: "#0ea5e9",   // cyan/blue
+      colourSecondary: "#0369a1",
+      colourTertiary: "#082f49",
+    },
+    dhc_data_property_block: {
+      colourPrimary: "#eab308",   // amber
+      colourSecondary: "#ca8a04",
+      colourTertiary: "#422006",
+    },
+    dhc_equipment_block: {
+      colourPrimary: "#a855f7",   // purple
+      colourSecondary: "#7e22ce",
+      colourTertiary: "#3b0764",
+    },
+  },
+  categoryStyles: {
+    classes: {
+      colour: "#22c55e",
+    },
+    objectProperties: {
+      colour: "#0ea5e9",
+    },
+    dataProperties: {
+      colour: "#eab308",
+    },
+  },
+  componentStyles: {
+    workspaceBackgroundColour: "#020617",
+    toolboxBackgroundColour: "#020617",
+    toolboxForegroundColour: "#e5e7eb",
+    flyoutBackgroundColour: "#020617",
+    flyoutForegroundColour: "#e5e7eb",
+    flyoutOpacity: 1,
+    scrollbarColour: "#22c55e",
+    insertionMarkerColour: "#22c55e",
+    insertionMarkerOpacity: 0.6,
+    cursorColour: "#38bdf8",
+    selectedGlowColour: "#38bdf8",
+    selectedGlowSize: 6,
+  },
+});
 
-// // 1. Define your custom block
-// Blockly.Blocks['my_custom_block'] = {
-//   init: function() {
-//     this.appendDummyInput()
-//         .appendField("Hello, world!");
-//     this.setColour(160);
-//     this.setTooltip("");
-//     this.setHelpUrl("");
-//   }
-// };
-
-// // 2. Define the toolbox using JSON, referencing the 'my_custom_block' type
-// const dhcToolbox2 = {
-//   "kind": "flyoutToolbox",
-//   "contents": [
-//     {
-//       "kind": "block",
-//       "type": "my_custom_block" // This links to the definition in Blockly.Blocks
-//     }
-//   ]
-// };
-
+/**
+ * Initialise the Blockly workspace in the given DOM container.
+ */
 export function initModelerWorkspace(container, options = {}) {
   if (!container) return null;
 
@@ -41,16 +72,21 @@ export function initModelerWorkspace(container, options = {}) {
     workspaceRef = null;
   }
 
-  console.log("Injecting Blockly into:", container);
-  console.log("DHC toolbox JSON:", dhcToolbox);
+  console.log("[DHC] Injecting Blockly into:", container);
+  console.log("[DHC] Toolbox JSON:", dhcToolbox);
+  console.log(
+    "[DHC] Available dhc_* blocks before inject:",
+    Object.keys(Blockly.Blocks).filter((k) => k.startsWith("dhc_"))
+  );
 
   workspaceRef = Blockly.inject(container, {
-    toolbox: dhcToolbox,   // JSON toolbox
+    toolbox: dhcToolbox,
+    theme: dhcTheme,       // 👈 apply our theme
     trashcan: true,
     grid: {
       spacing: 20,
       length: 2,
-      colour: "#334155",
+      colour: "#1f2937",
       snap: true,
     },
     zoom: {
@@ -62,8 +98,7 @@ export function initModelerWorkspace(container, options = {}) {
     },
   });
 
-  console.log("Workspace after inject:", workspaceRef);
-  console.log("Registered DHC blocks:", Object.keys(Blockly.Blocks).filter(k => k.startsWith("dhc_")));
+  console.log("[DHC] Workspace after inject:", workspaceRef);
 
   workspaceRef.addChangeListener((event) => {
     if (!selectionCallback) return;
