@@ -1,6 +1,9 @@
 import * as Blockly from "blockly";
 import { dhcToolbox } from "./toolbox";
 import "./blocks/dhc";
+import { DhcOntologyTheme } from './theme/dhc_ontology_theme';
+import './blocks/ontology_blocks';
+
 
 let workspaceRef = null;
 let selectionCallback = null;
@@ -81,7 +84,7 @@ export function initModelerWorkspace(container, options = {}) {
 
   workspaceRef = Blockly.inject(container, {
     toolbox: dhcToolbox,
-    theme: dhcTheme,       // 👈 apply our theme
+    theme: DhcOntologyTheme,
     trashcan: true,
     grid: {
       spacing: 20,
@@ -97,6 +100,17 @@ export function initModelerWorkspace(container, options = {}) {
       minScale: 0.5,
     },
   });
+
+  // If workspace is empty, add OWL:Thing as the root
+if (
+  workspaceRef.getTopBlocks(false).length === 0 &&
+  Blockly.Blocks["owl_thing"]
+) {
+  const thing = workspaceRef.newBlock("owl_thing");
+  thing.initSvg();
+  thing.render();
+  thing.moveBy(80, 80);
+}
 
   console.log("[DHC] Workspace after inject:", workspaceRef);
 

@@ -1,30 +1,5 @@
 import * as Blockly from "blockly";
 
-console.log("[DHC] Loading block definitions. Blockly.VERSION =", Blockly.VERSION);
-
-/**
- * OWL:Thing - top of the class hierarchy
- */
-Blockly.Blocks["owl_thing"] = {
-  init: function () {
-    this.appendDummyInput()
-      .appendField("Class")
-      .appendField("owl:Thing");
-    this.appendDummyInput()
-      .appendField("IRI")
-      .appendField(
-        new Blockly.FieldTextInput(
-          "http://www.w3.org/2002/07/owl#Thing"
-        ),
-        "IRI"
-      );
-    this.setStyle("dhc_class_block");  // reuse class style
-    this.setTooltip("OWL Thing: top of the class hierarchy");
-    this.setHelpUrl("https://www.w3.org/TR/owl-ref/#owl_Thing");
-    this.setOutput(true, "Class");
-  },
-};
-
 /**
  * DHC Class block
  */
@@ -44,7 +19,7 @@ Blockly.Blocks["dhc_class"] = {
         ),
         "IRI"
       );
-    this.setStyle("dhc_class_block");   // 👈 use themed style
+    this.setColour(210);
     this.setTooltip("Define a class in the DHC ontology");
     this.setHelpUrl("");
     this.setOutput(true, "Class");
@@ -68,7 +43,7 @@ Blockly.Blocks["dhc_object_property"] = {
     this.appendValueInput("RANGE")
       .setCheck("Class")
       .appendField("Range");
-    this.setStyle("dhc_object_property_block");  // 👈 themed style
+    this.setColour(160);
     this.setTooltip(
       "Relate one class to another (e.g. EquipmentType hasPart EquipmentType)"
     );
@@ -99,7 +74,7 @@ Blockly.Blocks["dhc_data_property"] = {
         ]),
         "RANGE"
       );
-    this.setStyle("dhc_data_property_block");   // 👈 themed style
+    this.setColour(140);
     this.setTooltip("Attach scalar values to a class");
     this.setHelpUrl("");
     this.setOutput(true, "DataProperty");
@@ -107,7 +82,7 @@ Blockly.Blocks["dhc_data_property"] = {
 };
 
 /**
- * DHC EquipmentType block
+ * DHC EquipmentType block (shortcut for common DHC pattern)
  */
 Blockly.Blocks["dhc_equipment_type"] = {
   init: function () {
@@ -123,14 +98,9 @@ Blockly.Blocks["dhc_equipment_type"] = {
         new Blockly.FieldTextInput("dhc:EquipmentType"),
         "BASE"
       );
-    this.setStyle("dhc_equipment_block");       // 👈 themed style
+    this.setColour(30);
     this.setTooltip("Specialised equipment type in the DHC model");
     this.setHelpUrl("");
     this.setOutput(true, "Class");
   },
 };
-
-console.log(
-  "[DHC] Blocks registered:",
-  Object.keys(Blockly.Blocks).filter((k) => k.startsWith("dhc_"))
-);
