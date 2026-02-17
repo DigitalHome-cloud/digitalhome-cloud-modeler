@@ -2,6 +2,11 @@ import * as React from "react";
 import { Link } from "gatsby";
 import { useTranslation } from "gatsby-plugin-react-i18next";
 
+const portalUrl =
+  process.env.GATSBY_PORTAL_URL || "https://portal.digitalhome.cloud";
+const designerUrl =
+  process.env.GATSBY_DESIGNER_URL || "https://designer.digitalhome.cloud";
+
 const Header = () => {
   const { t } = useTranslation();
 
@@ -17,33 +22,25 @@ const Header = () => {
         </div>
 
         <nav className="dhc-nav">
-          <Link to="/" className="dhc-nav-link">
-            {t("nav.home")}
-          </Link>
-          <a
-            href="https://portal.digitalhome.cloud"
-            className="dhc-nav-link"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("nav.portal")}
-          </a>
-          <a
-            href="https://designer.digitalhome.cloud"
-            className="dhc-nav-link"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("nav.designer")}
-          </a>
-          <a
-            href="https://github.com/DigitalHome-cloud"
-            className="dhc-nav-link"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("nav.github")}
-          </a>
+          <div className="dhc-nav-group">
+            <Link to="/" className="dhc-nav-link">
+              {t("nav.home")}
+            </Link>
+            <a href={portalUrl} className="dhc-nav-link">
+              {t("nav.portal")}
+            </a>
+            <a href={designerUrl} className="dhc-nav-link">
+              {t("nav.designer")}
+            </a>
+            <a
+              href="https://github.com/DigitalHome-cloud"
+              className="dhc-nav-link"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("nav.github")}
+            </a>
+          </div>
         </nav>
       </div>
     </header>

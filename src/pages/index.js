@@ -2,19 +2,11 @@ import * as React from "react";
 import { graphql } from "gatsby";
 import Layout from "../components/Layout";
 import WorkspaceShell from "../components/WorkspaceShell";
-import { useTranslation } from "gatsby-plugin-react-i18next";
 
 const IndexPage = () => {
-  const { t } = useTranslation();
-
   return (
     <Layout>
-      <main className="dhc-main">
-        <section className="dhc-hero">
-          <h1 className="dhc-hero-title">{t("app.title")}</h1>
-          <p className="dhc-hero-subtitle">{t("app.subtitle")}</p>
-        </section>
-
+      <main className="dhc-main dhc-main--full">
         <WorkspaceShell />
       </main>
     </Layout>

@@ -2,7 +2,7 @@ module.exports = {
   siteMetadata: {
     title: `DHC Modeler`,
     siteUrl: `https://modeler.digitalhome.cloud`,
-    description: `Your launchpad for designing, managing and operating smart homes.`,
+    description: `3D ontology viewer for the DigitalHome.Cloud platform.`,
     author: `D-LAB-5`
   },
   plugins: [
