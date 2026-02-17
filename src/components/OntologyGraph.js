@@ -16,6 +16,7 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
   const graphRef = React.useRef(null);
   const ForceGraph3DRef = React.useRef(null);
   const [ready, setReady] = React.useState(false);
+  const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 
   // Dynamic import for SSR safety
   React.useEffect(() => {
@@ -28,6 +29,31 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
       }
     });
     return () => { cancelled = true; };
+  }, []);
+
+  // Track container size with ResizeObserver
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof window === "undefined") return;
+
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect();
+      setDimensions((prev) => {
+        if (prev.width === Math.floor(width) && prev.height === Math.floor(height)) return prev;
+        return { width: Math.floor(width), height: Math.floor(height) };
+      });
+    };
+
+    measure();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(measure);
+      ro.observe(el);
+      return () => ro.disconnect();
+    } else {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
   }, []);
 
   // Filter/dim nodes based on activeView
@@ -71,8 +97,10 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
 
   if (!ready || !ForceGraph3DRef.current) {
     return (
-      <div className="dhc-graph-loading">
-        <span>Initializing 3D engine...</span>
+      <div ref={containerRef} className="dhc-graph-container">
+        <div className="dhc-graph-loading">
+          <span>Initializing 3D engine...</span>
+        </div>
       </div>
     );
   }
@@ -81,58 +109,62 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
 
   return (
     <div ref={containerRef} className="dhc-graph-container">
-      <ForceGraph3D
-        ref={graphRef}
-        graphData={processedData}
-        backgroundColor="#020617"
-        nodeLabel={(node) => `${node.label} (${node.type})`}
-        nodeColor={(node) =>
-          node._dimmed ? `${node._color}33` : node._color
-        }
-        nodeVal={(node) => (node._dimmed ? node._size * 0.5 : node._size)}
-        nodeOpacity={0.9}
-        nodeResolution={16}
-        linkColor={(link) =>
-          link.type === "subClassOf"
-            ? link._dimmed ? "#64748b33" : "#64748b"
-            : link._dimmed ? "#38bdf833" : "#38bdf8"
-        }
-        linkWidth={(link) => (link.type === "subClassOf" ? 1.5 : 0.8)}
-        linkOpacity={0.6}
-        linkDirectionalParticles={2}
-        linkDirectionalParticleWidth={1.5}
-        linkDirectionalParticleSpeed={0.005}
-        linkDirectionalParticleColor={(link) =>
-          link.type === "subClassOf" ? "#94a3b8" : "#38bdf8"
-        }
-        linkLabel={(link) => link.label}
-        onNodeClick={(node) => {
-          if (onNodeClick) onNodeClick(node.id);
-        }}
-        onNodeRightClick={(node, event) => {
-          event.preventDefault();
-          if (graphRef.current) {
-            graphRef.current.zoomToFit(400, 50);
+      {dimensions.width > 0 && dimensions.height > 0 && (
+        <ForceGraph3D
+          ref={graphRef}
+          width={dimensions.width}
+          height={dimensions.height}
+          graphData={processedData}
+          backgroundColor="#020617"
+          nodeLabel={(node) => `${node.label} (${node.type})`}
+          nodeColor={(node) =>
+            node._dimmed ? `${node._color}33` : node._color
           }
-        }}
-        nodeThreeObjectExtend={true}
-        nodeThreeObject={(node) => {
-          if (typeof window === "undefined") return null;
-          const THREE = require("three");
-          const sprite = new THREE.Sprite(
-            new THREE.SpriteMaterial({
-              map: createTextTexture(node.label, node._color, node._dimmed),
-              transparent: true,
-              depthWrite: false,
-            })
-          );
-          sprite.scale.set(24, 6, 1);
-          sprite.position.set(0, 8, 0);
-          return sprite;
-        }}
-        warmupTicks={50}
-        cooldownTime={3000}
-      />
+          nodeVal={(node) => (node._dimmed ? node._size * 0.5 : node._size)}
+          nodeOpacity={0.9}
+          nodeResolution={16}
+          linkColor={(link) =>
+            link.type === "subClassOf"
+              ? link._dimmed ? "#64748b33" : "#64748b"
+              : link._dimmed ? "#38bdf833" : "#38bdf8"
+          }
+          linkWidth={(link) => (link.type === "subClassOf" ? 1.5 : 0.8)}
+          linkOpacity={0.6}
+          linkDirectionalParticles={2}
+          linkDirectionalParticleWidth={1.5}
+          linkDirectionalParticleSpeed={0.005}
+          linkDirectionalParticleColor={(link) =>
+            link.type === "subClassOf" ? "#94a3b8" : "#38bdf8"
+          }
+          linkLabel={(link) => link.label}
+          onNodeClick={(node) => {
+            if (onNodeClick) onNodeClick(node.id);
+          }}
+          onNodeRightClick={(node, event) => {
+            event.preventDefault();
+            if (graphRef.current) {
+              graphRef.current.zoomToFit(400, 50);
+            }
+          }}
+          nodeThreeObjectExtend={true}
+          nodeThreeObject={(node) => {
+            if (typeof window === "undefined") return null;
+            const THREE = require("three");
+            const sprite = new THREE.Sprite(
+              new THREE.SpriteMaterial({
+                map: createTextTexture(node.label, node._color, node._dimmed),
+                transparent: true,
+                depthWrite: false,
+              })
+            );
+            sprite.scale.set(24, 6, 1);
+            sprite.position.set(0, 8, 0);
+            return sprite;
+          }}
+          warmupTicks={50}
+          cooldownTime={3000}
+        />
+      )}
     </div>
   );
 };
