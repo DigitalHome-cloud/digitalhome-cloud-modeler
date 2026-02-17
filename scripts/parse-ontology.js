@@ -11,7 +11,7 @@ const path = require("path");
 
 const TTL_PATH = path.resolve(
   __dirname,
-  "../../digitalhome-cloud-semantic-core/ontology/dhc-core.schema.ttl"
+  "../semantic-core/ontology/dhc-core.schema.ttl"
 );
 const OUT_PATH = path.resolve(__dirname, "../src/data/ontology-graph.json");
 
