@@ -1,6 +1,8 @@
-# 🏡 DigitalHome.Cloud Semantic Core
+# DigitalHome.Cloud Semantic Core
 
-The **DigitalHome.Cloud Semantic Core** is at this stage and experimental project aiming at building an open, interoperable foundation of the DigitalHome ecosystem.  
+> This directory is part of the `digitalhome-cloud-modeler` repository (merged from the former standalone `digitalhome-cloud-semantic-core` repo).
+
+The **DigitalHome.Cloud Semantic Core** is at this stage an experimental project aiming at building an open, interoperable foundation of the DigitalHome ecosystem.  
 It models how real-world spaces, circuits, and equipment relate semantically from architecture to automation 
 and aligns with international building standards such as **BRICK**, **RealEstateCore**, and **IFC**.
 
