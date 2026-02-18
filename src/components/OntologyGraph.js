@@ -11,12 +11,14 @@ const VIEW_COLORS = {
 };
 const DEFAULT_COLOR = "#e5e7eb";
 
-const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => {
+const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode, canvasHeight }) => {
   const containerRef = React.useRef(null);
   const graphRef = React.useRef(null);
   const ForceGraph3DRef = React.useRef(null);
   const [ready, setReady] = React.useState(false);
-  const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
+  const [width, setWidth] = React.useState(0);
+
+  const height = canvasHeight || 600;
 
   // Dynamic import for SSR safety
   React.useEffect(() => {
@@ -31,17 +33,14 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
     return () => { cancelled = true; };
   }, []);
 
-  // Track container size with ResizeObserver
+  // Measure container width (height is fixed via prop)
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof window === "undefined") return;
 
     const measure = () => {
-      const { width, height } = el.getBoundingClientRect();
-      setDimensions((prev) => {
-        if (prev.width === Math.floor(width) && prev.height === Math.floor(height)) return prev;
-        return { width: Math.floor(width), height: Math.floor(height) };
-      });
+      const w = Math.floor(el.getBoundingClientRect().width);
+      setWidth((prev) => (prev === w ? prev : w));
     };
 
     measure();
@@ -97,7 +96,7 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
 
   if (!ready || !ForceGraph3DRef.current) {
     return (
-      <div ref={containerRef} className="dhc-graph-container">
+      <div ref={containerRef} className="dhc-graph-container" style={{ height }}>
         <div className="dhc-graph-loading">
           <span>Initializing 3D engine...</span>
         </div>
@@ -108,12 +107,12 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode }) => 
   const ForceGraph3D = ForceGraph3DRef.current;
 
   return (
-    <div ref={containerRef} className="dhc-graph-container">
-      {dimensions.width > 0 && dimensions.height > 0 && (
+    <div ref={containerRef} className="dhc-graph-container" style={{ height }}>
+      {width > 0 && (
         <ForceGraph3D
           ref={graphRef}
-          width={dimensions.width}
-          height={dimensions.height}
+          width={width}
+          height={height}
           graphData={processedData}
           backgroundColor="#020617"
           nodeLabel={(node) => `${node.label} (${node.type})`}
