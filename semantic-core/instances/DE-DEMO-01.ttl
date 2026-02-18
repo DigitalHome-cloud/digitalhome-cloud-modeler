@@ -1,9 +1,9 @@
 @prefix dhc:  <https://digitalhome.cloud/ontology#> .
-@prefix home: <https://digitalhome.cloud/instances/DE-DEMO#> .
+@prefix home: <https://digitalhome.cloud/instances/DE-DEMO-01#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
 # ============================================================
-# DE-DEMO — Demo SmartHome instance (ABox)
+# DE-DEMO-01 — Demo SmartHome instance (ABox)
 #
 # This file instantiates the DHC core ontology for a demo
 # German property. It shows how classes from the TBox become
@@ -12,9 +12,9 @@
 
 # ── The property itself ──
 
-home:DE-DEMO
+home:DE-DEMO-01
   a dhc:RealEstate ;
-  dhc:smartHomeId "DE-DEMO" ;
+  dhc:smartHomeId "DE-DEMO-01" ;
   dhc:name "Demo Haus Deutschland" ;
   dhc:description "A demo German smart home for the DigitalHome.Cloud platform." ;
   dhc:hasArea home:MainBuilding ;

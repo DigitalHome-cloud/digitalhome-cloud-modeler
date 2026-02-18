@@ -578,6 +578,140 @@
       "range": "dhc:Actor"
     },
     {
+      "id": "dhc:Agent",
+      "label": "Agent",
+      "type": "class",
+      "view": "governance",
+      "comment": "Something that can hold responsibility or perform actions (person or organization)."
+    },
+    {
+      "id": "dhc:Person",
+      "label": "Person",
+      "type": "class",
+      "view": "governance",
+      "comment": "A natural person. Avoid storing sensitive personal data; use identifiers/display names.",
+      "superClass": "dhc:Agent"
+    },
+    {
+      "id": "dhc:Organization",
+      "label": "Organization",
+      "type": "class",
+      "view": "governance",
+      "comment": "Company, association, utility, contractor, architect office, property manager.",
+      "superClass": "dhc:Agent"
+    },
+    {
+      "id": "dhc:Role",
+      "label": "Role",
+      "type": "class",
+      "view": "governance",
+      "comment": "A type of role (Owner, Operator, Installer, Maintainer, Occupant, etc.)."
+    },
+    {
+      "id": "dhc:RoleAssignment",
+      "label": "Role Assignment",
+      "type": "class",
+      "view": "governance",
+      "comment": "Agent X plays Role Y in Context Z (optionally during time window T)."
+    },
+    {
+      "id": "dhc:Project",
+      "label": "Project",
+      "type": "class",
+      "view": "governance",
+      "comment": "An engineering/design/build project, distinct from the as-operated asset twin."
+    },
+    {
+      "id": "dhc:assignedAgent",
+      "label": "assigned agent",
+      "type": "objectProperty",
+      "view": "governance",
+      "domain": "dhc:RoleAssignment",
+      "range": "dhc:Agent"
+    },
+    {
+      "id": "dhc:assignedRole",
+      "label": "assigned role",
+      "type": "objectProperty",
+      "view": "governance",
+      "domain": "dhc:RoleAssignment",
+      "range": "dhc:Role"
+    },
+    {
+      "id": "dhc:assignmentContext",
+      "label": "assignment context",
+      "type": "objectProperty",
+      "view": "governance",
+      "comment": "Context of the role: RealEstate, Project, Equipment, or a system (HVACSystem, PlumbingSystem, etc.).",
+      "domain": "dhc:RoleAssignment"
+    },
+    {
+      "id": "dhc:owns",
+      "label": "owns",
+      "type": "objectProperty",
+      "view": "governance",
+      "comment": "Ownership of a RealEstate or Equipment.",
+      "domain": "dhc:Agent"
+    },
+    {
+      "id": "dhc:operates",
+      "label": "operates",
+      "type": "objectProperty",
+      "view": "governance",
+      "comment": "Operational responsibility for a RealEstate, system, or Equipment.",
+      "domain": "dhc:Agent"
+    },
+    {
+      "id": "dhc:maintains",
+      "label": "maintains",
+      "type": "objectProperty",
+      "view": "governance",
+      "comment": "Maintenance responsibility for Equipment or a system.",
+      "domain": "dhc:Agent"
+    },
+    {
+      "id": "dhc:installedBy",
+      "label": "installed by",
+      "type": "objectProperty",
+      "view": "governance",
+      "comment": "The agent that installed Equipment or a system.",
+      "range": "dhc:Agent"
+    },
+    {
+      "id": "dhc:externalId",
+      "label": "external ID",
+      "type": "datatypeProperty",
+      "view": "governance",
+      "comment": "Link to IAM/CRM/ERP identity key (Cognito subject, SAP BP, etc.).",
+      "domain": "dhc:Agent",
+      "range": "xsd:string"
+    },
+    {
+      "id": "dhc:validFrom",
+      "label": "valid from",
+      "type": "datatypeProperty",
+      "view": "governance",
+      "domain": "dhc:RoleAssignment",
+      "range": "xsd:dateTime"
+    },
+    {
+      "id": "dhc:validTo",
+      "label": "valid to",
+      "type": "datatypeProperty",
+      "view": "governance",
+      "domain": "dhc:RoleAssignment",
+      "range": "xsd:dateTime"
+    },
+    {
+      "id": "dhc:assignmentStatus",
+      "label": "assignment status",
+      "type": "datatypeProperty",
+      "view": "governance",
+      "comment": "One of: planned, active, ended.",
+      "domain": "dhc:RoleAssignment",
+      "range": "xsd:string"
+    },
+    {
       "id": "dhc:Guideline",
       "label": "Guideline",
       "type": "class",
@@ -934,6 +1068,54 @@
       "target": "dhc:Equipment",
       "label": "has group member",
       "type": "objectProperty"
+    },
+    {
+      "source": "dhc:Person",
+      "target": "dhc:Agent",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc:Organization",
+      "target": "dhc:Agent",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc:RoleAssignment",
+      "target": "dhc:Agent",
+      "label": "assigned agent",
+      "type": "objectProperty"
+    },
+    {
+      "source": "dhc:RoleAssignment",
+      "target": "dhc:Role",
+      "label": "assigned role",
+      "type": "objectProperty"
+    },
+    {
+      "source": "dhc:externalId",
+      "target": "dhc:Agent",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:validFrom",
+      "target": "dhc:RoleAssignment",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:validTo",
+      "target": "dhc:RoleAssignment",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:assignmentStatus",
+      "target": "dhc:RoleAssignment",
+      "label": "domain",
+      "type": "domain"
     },
     {
       "source": "dhc:guidelineCategory",

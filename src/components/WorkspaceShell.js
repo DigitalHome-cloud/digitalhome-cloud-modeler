@@ -5,7 +5,7 @@ import OntologyInspector from "./OntologyInspector";
 import graphData from "../data/ontology-graph.json";
 
 const ALL_VIEWS = new Set([
-  "spatial", "building", "electrical", "plumbing", "heating", "network", "automation",
+  "spatial", "building", "electrical", "plumbing", "heating", "network", "governance", "automation",
 ]);
 
 const WorkspaceShell = () => {

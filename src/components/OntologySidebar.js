@@ -7,6 +7,7 @@ const VIEW_COLORS = {
   plumbing: "#06b6d4",
   heating: "#ef4444",
   network: "#a855f7",
+  governance: "#f97316",
   automation: "#ec4899",
 };
 
@@ -17,6 +18,7 @@ const VIEW_LABELS = {
   plumbing: "Plumbing",
   heating: "Heating / HVAC",
   network: "Network",
+  governance: "Governance",
   automation: "Automation",
 };
 
@@ -27,6 +29,7 @@ const VIEW_ORDER = [
   "plumbing",
   "heating",
   "network",
+  "governance",
   "automation",
 ];
 

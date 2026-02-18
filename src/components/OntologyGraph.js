@@ -7,6 +7,7 @@ const VIEW_COLORS = {
   plumbing: "#06b6d4",
   heating: "#ef4444",
   network: "#a855f7",
+  governance: "#f97316",
   automation: "#ec4899",
 };
 const DEFAULT_COLOR = "#e5e7eb";

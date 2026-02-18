@@ -20,6 +20,7 @@
 #   - Plumbing:   Water supply, drainage, fixtures
 #   - Heating:    HVAC, radiators, heat pumps, thermostats
 #   - Network:    LAN, WiFi, ZigBee, automation protocols
+#   - Governance: Agents, roles, role assignments, projects
 #   - Automation: Groups, scenarios, sensors, actors
 # ============================================================
 
@@ -652,6 +653,147 @@ dhc:hasAction
 
 
 # ============================================================
+# DESIGN VIEW: Governance
+# Stakeholders, roles, role assignments, projects
+# ============================================================
+
+dhc:Agent
+  a owl:Class ;
+  rdfs:label "Agent"@en ;
+  rdfs:label "Akteur"@de ;
+  rdfs:label "Agent"@fr ;
+  rdfs:comment "Something that can hold responsibility or perform actions (person or organization)."@en ;
+  dhc:designView "governance" .
+
+dhc:Person
+  a owl:Class ;
+  rdfs:subClassOf dhc:Agent ;
+  rdfs:label "Person"@en ;
+  rdfs:label "Person"@de ;
+  rdfs:label "Personne"@fr ;
+  rdfs:comment "A natural person. Avoid storing sensitive personal data; use identifiers/display names."@en ;
+  dhc:designView "governance" .
+
+dhc:Organization
+  a owl:Class ;
+  rdfs:subClassOf dhc:Agent ;
+  rdfs:label "Organization"@en ;
+  rdfs:label "Organisation"@de ;
+  rdfs:label "Organisation"@fr ;
+  rdfs:comment "Company, association, utility, contractor, architect office, property manager."@en ;
+  dhc:designView "governance" .
+
+dhc:Role
+  a owl:Class ;
+  rdfs:label "Role"@en ;
+  rdfs:label "Rolle"@de ;
+  rdfs:label "Rôle"@fr ;
+  rdfs:comment "A type of role (Owner, Operator, Installer, Maintainer, Occupant, etc.)."@en ;
+  dhc:designView "governance" .
+
+dhc:RoleAssignment
+  a owl:Class ;
+  rdfs:label "Role Assignment"@en ;
+  rdfs:label "Rollenzuweisung"@de ;
+  rdfs:label "Attribution de rôle"@fr ;
+  rdfs:comment "Agent X plays Role Y in Context Z (optionally during time window T)."@en ;
+  dhc:designView "governance" .
+
+dhc:Project
+  a owl:Class ;
+  rdfs:label "Project"@en ;
+  rdfs:label "Projekt"@de ;
+  rdfs:label "Projet"@fr ;
+  rdfs:comment "An engineering/design/build project, distinct from the as-operated asset twin."@en ;
+  dhc:designView "governance" .
+
+# ── Governance object properties: Role assignment pattern ──
+
+dhc:assignedAgent
+  a owl:ObjectProperty ;
+  rdfs:label "assigned agent"@en ;
+  rdfs:domain dhc:RoleAssignment ;
+  rdfs:range dhc:Agent ;
+  dhc:designView "governance" .
+
+dhc:assignedRole
+  a owl:ObjectProperty ;
+  rdfs:label "assigned role"@en ;
+  rdfs:domain dhc:RoleAssignment ;
+  rdfs:range dhc:Role ;
+  dhc:designView "governance" .
+
+dhc:assignmentContext
+  a owl:ObjectProperty ;
+  rdfs:label "assignment context"@en ;
+  rdfs:domain dhc:RoleAssignment ;
+  rdfs:comment "Context of the role: RealEstate, Project, Equipment, or a system (HVACSystem, PlumbingSystem, etc.)."@en ;
+  dhc:designView "governance" .
+
+# ── Governance object properties: Responsibility shortcuts ──
+
+dhc:owns
+  a owl:ObjectProperty ;
+  rdfs:label "owns"@en ;
+  rdfs:domain dhc:Agent ;
+  rdfs:comment "Ownership of a RealEstate or Equipment."@en ;
+  dhc:designView "governance" .
+
+dhc:operates
+  a owl:ObjectProperty ;
+  rdfs:label "operates"@en ;
+  rdfs:domain dhc:Agent ;
+  rdfs:comment "Operational responsibility for a RealEstate, system, or Equipment."@en ;
+  dhc:designView "governance" .
+
+dhc:maintains
+  a owl:ObjectProperty ;
+  rdfs:label "maintains"@en ;
+  rdfs:domain dhc:Agent ;
+  rdfs:comment "Maintenance responsibility for Equipment or a system."@en ;
+  dhc:designView "governance" .
+
+dhc:installedBy
+  a owl:ObjectProperty ;
+  rdfs:label "installed by"@en ;
+  rdfs:range dhc:Agent ;
+  rdfs:comment "The agent that installed Equipment or a system."@en ;
+  dhc:designView "governance" .
+
+# ── Governance data properties ──
+
+dhc:externalId
+  a owl:DatatypeProperty ;
+  rdfs:label "external ID"@en ;
+  rdfs:domain dhc:Agent ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Link to IAM/CRM/ERP identity key (Cognito subject, SAP BP, etc.)."@en ;
+  dhc:designView "governance" .
+
+dhc:validFrom
+  a owl:DatatypeProperty ;
+  rdfs:label "valid from"@en ;
+  rdfs:domain dhc:RoleAssignment ;
+  rdfs:range xsd:dateTime ;
+  dhc:designView "governance" .
+
+dhc:validTo
+  a owl:DatatypeProperty ;
+  rdfs:label "valid to"@en ;
+  rdfs:domain dhc:RoleAssignment ;
+  rdfs:range xsd:dateTime ;
+  dhc:designView "governance" .
+
+dhc:assignmentStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "assignment status"@en ;
+  rdfs:domain dhc:RoleAssignment ;
+  rdfs:range xsd:string ;
+  rdfs:comment "One of: planned, active, ended."@en ;
+  dhc:designView "governance" .
+
+
+# ============================================================
 # SHARED: Compliance & Guidelines
 # ============================================================
 
@@ -689,7 +831,7 @@ dhc:governedBy
 dhc:designView
   a owl:AnnotationProperty ;
   rdfs:label "design view"@en ;
-  rdfs:comment "Indicates which Designer view/toolbox this concept belongs to. Values: spatial, building, electrical, plumbing, heating, network, automation."@en .
+  rdfs:comment "Indicates which Designer view/toolbox this concept belongs to. Values: spatial, building, electrical, plumbing, heating, network, governance, automation."@en .
 
 
 # ============================================================
