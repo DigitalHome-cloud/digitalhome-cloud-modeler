@@ -11,14 +11,19 @@ const VIEW_COLORS = {
 };
 const DEFAULT_COLOR = "#e5e7eb";
 
-const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode, canvasHeight }) => {
+const LINK_STYLES = {
+  subClassOf: { color: "#64748b", width: 1.5, particles: 2, particleColor: "#94a3b8", dash: null },
+  objectProperty: { color: "#38bdf8", width: 1.2, particles: 2, particleColor: "#38bdf8", dash: null },
+  domain: { color: "#22c55e88", width: 0.6, particles: 0, particleColor: null, dash: [2, 2] },
+  range: { color: "#f59e0b88", width: 0.6, particles: 0, particleColor: null, dash: [2, 2] },
+};
+const DEFAULT_LINK_STYLE = { color: "#38bdf8", width: 0.8, particles: 0, particleColor: null, dash: null };
+
+const OntologyGraph = ({ graphData, showProperties, visibleViews, onNodeClick, selectedNode }) => {
   const containerRef = React.useRef(null);
   const graphRef = React.useRef(null);
   const ForceGraph3DRef = React.useRef(null);
   const [ready, setReady] = React.useState(false);
-  const [width, setWidth] = React.useState(0);
-
-  const height = canvasHeight || 600;
 
   // Dynamic import for SSR safety
   React.useEffect(() => {
@@ -33,53 +38,31 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode, canva
     return () => { cancelled = true; };
   }, []);
 
-  // Measure container width (height is fixed via prop)
-  React.useEffect(() => {
-    const el = containerRef.current;
-    if (!el || typeof window === "undefined") return;
-
-    const measure = () => {
-      const w = Math.floor(el.getBoundingClientRect().width);
-      setWidth((prev) => (prev === w ? prev : w));
-    };
-
-    measure();
-
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver(measure);
-      ro.observe(el);
-      return () => ro.disconnect();
-    } else {
-      window.addEventListener("resize", measure);
-      return () => window.removeEventListener("resize", measure);
-    }
-  }, []);
-
-  // Filter/dim nodes based on activeView
+  // Filter nodes based on visibility settings
   const processedData = React.useMemo(() => {
     if (!graphData) return { nodes: [], links: [] };
 
-    const nodes = graphData.nodes.map((n) => ({
-      ...n,
-      _color: VIEW_COLORS[n.view] || DEFAULT_COLOR,
-      _dimmed: activeView && n.view !== activeView,
-      _size: n.type === "class" ? 6 : 3,
-    }));
+    const isPropertyType = (type) => type === "objectProperty" || type === "datatypeProperty";
+
+    const nodes = graphData.nodes
+      .filter((n) => {
+        if (!showProperties && isPropertyType(n.type)) return false;
+        if (visibleViews && n.view && !visibleViews.has(n.view)) return false;
+        return true;
+      })
+      .map((n) => ({
+        ...n,
+        _color: VIEW_COLORS[n.view] || DEFAULT_COLOR,
+        _size: n.type === "class" ? 8 : 4,
+      }));
 
     const nodeIds = new Set(nodes.map((n) => n.id));
     const links = graphData.links.filter(
       (l) => nodeIds.has(l.source?.id || l.source) && nodeIds.has(l.target?.id || l.target)
-    ).map((l) => ({
-      ...l,
-      _dimmed: activeView && (() => {
-        const srcNode = graphData.nodes.find((n) => n.id === (l.source?.id || l.source));
-        const tgtNode = graphData.nodes.find((n) => n.id === (l.target?.id || l.target));
-        return srcNode?.view !== activeView && tgtNode?.view !== activeView;
-      })(),
-    }));
+    ).map((l) => ({ ...l }));
 
     return { nodes, links };
-  }, [graphData, activeView]);
+  }, [graphData, showProperties, visibleViews]);
 
   // Camera focus on selected node
   React.useEffect(() => {
@@ -96,74 +79,84 @@ const OntologyGraph = ({ graphData, activeView, onNodeClick, selectedNode, canva
 
   if (!ready || !ForceGraph3DRef.current) {
     return (
-      <div ref={containerRef} className="dhc-graph-container" style={{ height }}>
-        <div className="dhc-graph-loading">
-          <span>Initializing 3D engine...</span>
-        </div>
+      <div className="dhc-graph-loading">
+        <span>Initializing 3D engine...</span>
       </div>
     );
   }
 
   const ForceGraph3D = ForceGraph3DRef.current;
 
+  const getLinkStyle = (link) => LINK_STYLES[link.type] || DEFAULT_LINK_STYLE;
+
   return (
-    <div ref={containerRef} className="dhc-graph-container" style={{ height }}>
-      {width > 0 && (
-        <ForceGraph3D
-          ref={graphRef}
-          width={width}
-          height={height}
-          graphData={processedData}
-          backgroundColor="#020617"
-          nodeLabel={(node) => `${node.label} (${node.type})`}
-          nodeColor={(node) =>
-            node._dimmed ? `${node._color}33` : node._color
+    <div ref={containerRef} className="dhc-graph-container">
+      <ForceGraph3D
+        ref={graphRef}
+        graphData={processedData}
+        backgroundColor="#020617"
+        nodeLabel={(node) => `${node.label} (${node.type})`}
+        nodeVal={(node) => node._size}
+        nodeColor={() => "#000000"}
+        nodeOpacity={0}
+        nodeResolution={16}
+        linkColor={(link) => getLinkStyle(link).color}
+        linkWidth={(link) => getLinkStyle(link).width}
+        linkOpacity={0.6}
+        linkLineDash={(link) => getLinkStyle(link).dash}
+        linkDirectionalParticles={(link) => getLinkStyle(link).particles}
+        linkDirectionalParticleWidth={1.5}
+        linkDirectionalParticleSpeed={0.005}
+        linkDirectionalParticleColor={(link) => getLinkStyle(link).particleColor}
+        linkLabel={(link) => link.label}
+        onNodeClick={(node) => {
+          if (onNodeClick) onNodeClick(node.id);
+        }}
+        onNodeRightClick={(node, event) => {
+          event.preventDefault();
+          if (graphRef.current) {
+            graphRef.current.zoomToFit(400, 50);
           }
-          nodeVal={(node) => (node._dimmed ? node._size * 0.5 : node._size)}
-          nodeOpacity={0.9}
-          nodeResolution={16}
-          linkColor={(link) =>
-            link.type === "subClassOf"
-              ? link._dimmed ? "#64748b33" : "#64748b"
-              : link._dimmed ? "#38bdf833" : "#38bdf8"
+        }}
+        nodeThreeObjectExtend={false}
+        nodeThreeObject={(node) => {
+          if (typeof window === "undefined") return null;
+          const THREE = require("three");
+
+          let geometry;
+          if (node.type === "class") {
+            geometry = new THREE.SphereGeometry(5, 16, 16);
+          } else if (node.type === "objectProperty") {
+            geometry = new THREE.OctahedronGeometry(4);
+          } else {
+            geometry = new THREE.BoxGeometry(5, 5, 5);
           }
-          linkWidth={(link) => (link.type === "subClassOf" ? 1.5 : 0.8)}
-          linkOpacity={0.6}
-          linkDirectionalParticles={2}
-          linkDirectionalParticleWidth={1.5}
-          linkDirectionalParticleSpeed={0.005}
-          linkDirectionalParticleColor={(link) =>
-            link.type === "subClassOf" ? "#94a3b8" : "#38bdf8"
-          }
-          linkLabel={(link) => link.label}
-          onNodeClick={(node) => {
-            if (onNodeClick) onNodeClick(node.id);
-          }}
-          onNodeRightClick={(node, event) => {
-            event.preventDefault();
-            if (graphRef.current) {
-              graphRef.current.zoomToFit(400, 50);
-            }
-          }}
-          nodeThreeObjectExtend={true}
-          nodeThreeObject={(node) => {
-            if (typeof window === "undefined") return null;
-            const THREE = require("three");
-            const sprite = new THREE.Sprite(
-              new THREE.SpriteMaterial({
-                map: createTextTexture(node.label, node._color, node._dimmed),
-                transparent: true,
-                depthWrite: false,
-              })
-            );
-            sprite.scale.set(24, 6, 1);
-            sprite.position.set(0, 8, 0);
-            return sprite;
-          }}
-          warmupTicks={50}
-          cooldownTime={3000}
-        />
-      )}
+
+          const material = new THREE.MeshLambertMaterial({
+            color: node._color,
+            transparent: true,
+            opacity: 0.9,
+          });
+          const mesh = new THREE.Mesh(geometry, material);
+
+          const sprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({
+              map: createTextTexture(node.label, node._color, false),
+              transparent: true,
+              depthWrite: false,
+            })
+          );
+          sprite.scale.set(24, 6, 1);
+          sprite.position.set(0, 8, 0);
+
+          const group = new THREE.Group();
+          group.add(mesh);
+          group.add(sprite);
+          return group;
+        }}
+        warmupTicks={50}
+        cooldownTime={3000}
+      />
     </div>
   );
 };
