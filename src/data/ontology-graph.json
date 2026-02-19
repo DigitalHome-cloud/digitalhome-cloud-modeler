@@ -540,6 +540,14 @@
       "range": "xsd:decimal"
     },
     {
+      "id": "dhc:catalogRef",
+      "label": "catalog reference",
+      "type": "datatypeProperty",
+      "comment": "Reference to a product catalog entry (GraphQL ID or SKU).",
+      "domain": "dhc:EquipmentType",
+      "range": "xsd:string"
+    },
+    {
       "id": "dhc:Group",
       "label": "Group",
       "type": "class",
@@ -739,6 +747,93 @@
       "type": "objectProperty",
       "domain": "dhc:Circuit",
       "range": "dhc:Guideline"
+    },
+    {
+      "id": "dhc:ElectricVehicle",
+      "label": "Electric Vehicle",
+      "type": "class",
+      "comment": "An electrically powered vehicle associated with the property."
+    },
+    {
+      "id": "dhc:ElectricCar",
+      "label": "Electric Car",
+      "type": "class",
+      "comment": "A battery-electric or plug-in hybrid car.",
+      "superClass": "dhc:ElectricVehicle"
+    },
+    {
+      "id": "dhc:ElectricBicycle",
+      "label": "Electric Bicycle",
+      "type": "class",
+      "comment": "A pedal-assisted electric bicycle or e-bike.",
+      "superClass": "dhc:ElectricVehicle"
+    },
+    {
+      "id": "dhc:ElectricScooter",
+      "label": "Electric Scooter",
+      "type": "class",
+      "comment": "An electric kick-scooter or moped.",
+      "superClass": "dhc:ElectricVehicle"
+    },
+    {
+      "id": "dhc:ChargingStation",
+      "label": "Charging Station",
+      "type": "class",
+      "comment": "A charging point for electric vehicles: wallbox, standard outlet, or public charger."
+    },
+    {
+      "id": "dhc:hasElectricVehicle",
+      "label": "has electric vehicle",
+      "type": "objectProperty",
+      "domain": "dhc:RealEstate",
+      "range": "dhc:ElectricVehicle"
+    },
+    {
+      "id": "dhc:hasChargingStation",
+      "label": "has charging station",
+      "type": "objectProperty",
+      "domain": "dhc:RealEstate",
+      "range": "dhc:ChargingStation"
+    },
+    {
+      "id": "dhc:chargedAt",
+      "label": "charged at",
+      "type": "objectProperty",
+      "comment": "The charging station used by this vehicle.",
+      "domain": "dhc:ElectricVehicle",
+      "range": "dhc:ChargingStation"
+    },
+    {
+      "id": "dhc:batteryCapacity",
+      "label": "battery capacity (kWh)",
+      "type": "datatypeProperty",
+      "comment": "Usable battery capacity in kilowatt-hours.",
+      "domain": "dhc:ElectricVehicle",
+      "range": "xsd:decimal"
+    },
+    {
+      "id": "dhc:chargingPower",
+      "label": "charging power (kW)",
+      "type": "datatypeProperty",
+      "comment": "Maximum charging power in kilowatts.",
+      "domain": "dhc:ChargingStation",
+      "range": "xsd:decimal"
+    },
+    {
+      "id": "dhc:chargingType",
+      "label": "charging type",
+      "type": "datatypeProperty",
+      "comment": "Type of charger: 230V outlet, wallbox 11kW, wallbox 22kW, DC fast charger.",
+      "domain": "dhc:ChargingStation",
+      "range": "xsd:string"
+    },
+    {
+      "id": "dhc:vehicleRange",
+      "label": "range (km)",
+      "type": "datatypeProperty",
+      "comment": "Estimated range on a full charge in kilometers.",
+      "domain": "dhc:ElectricVehicle",
+      "range": "xsd:decimal"
     },
     {
       "id": "dhc:name",
@@ -1064,6 +1159,12 @@
       "type": "domain"
     },
     {
+      "source": "dhc:catalogRef",
+      "target": "dhc:EquipmentType",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
       "source": "dhc:Group",
       "target": "dhc:Equipment",
       "label": "has group member",
@@ -1134,6 +1235,66 @@
       "target": "dhc:Guideline",
       "label": "governed by",
       "type": "objectProperty"
+    },
+    {
+      "source": "dhc:ElectricCar",
+      "target": "dhc:ElectricVehicle",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc:ElectricBicycle",
+      "target": "dhc:ElectricVehicle",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc:ElectricScooter",
+      "target": "dhc:ElectricVehicle",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc:RealEstate",
+      "target": "dhc:ElectricVehicle",
+      "label": "has electric vehicle",
+      "type": "objectProperty"
+    },
+    {
+      "source": "dhc:RealEstate",
+      "target": "dhc:ChargingStation",
+      "label": "has charging station",
+      "type": "objectProperty"
+    },
+    {
+      "source": "dhc:ElectricVehicle",
+      "target": "dhc:ChargingStation",
+      "label": "charged at",
+      "type": "objectProperty"
+    },
+    {
+      "source": "dhc:batteryCapacity",
+      "target": "dhc:ElectricVehicle",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:chargingPower",
+      "target": "dhc:ChargingStation",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:chargingType",
+      "target": "dhc:ChargingStation",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:vehicleRange",
+      "target": "dhc:ElectricVehicle",
+      "label": "domain",
+      "type": "domain"
     },
     {
       "source": "dhc:smartHomeId",

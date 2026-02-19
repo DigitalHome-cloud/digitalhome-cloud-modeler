@@ -20,7 +20,9 @@ home:BE-DEMO-01
   dhc:hasArea home:Appartement ;
   dhc:hasHVACSystem home:ChauffageGaz ;
   dhc:hasPlumbingSystem home:EauVille ;
-  dhc:hasNetworkSegment home:ReseauLocal .
+  dhc:hasNetworkSegment home:ReseauLocal ;
+  dhc:hasElectricVehicle home:TrottinetteElectrique ;
+  dhc:hasChargingStation home:PriseGarage .
 
 # ── Spatial: Areas & Floors ──
 
@@ -171,3 +173,17 @@ home:ReseauLocal
 home:WiFi
   a dhc:WiFiAccessPoint ;
   dhc:name "WiFi appartement" .
+
+# ── E-Mobilité ──
+
+home:PriseGarage
+  a dhc:ChargingStation ;
+  dhc:name "Prise garage 230V" ;
+  dhc:chargingPower 2.3 ;
+  dhc:chargingType "230V outlet" .
+
+home:TrottinetteElectrique
+  a dhc:ElectricScooter ;
+  dhc:name "Trottinette électrique" ;
+  dhc:batteryCapacity 0.4 ;
+  dhc:vehicleRange 40.0 .

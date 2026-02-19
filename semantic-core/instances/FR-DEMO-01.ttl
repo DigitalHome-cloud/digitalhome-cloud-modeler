@@ -21,7 +21,9 @@ home:FR-DEMO-01
   dhc:hasArea home:Jardin ;
   dhc:hasHVACSystem home:ChauffageElectrique ;
   dhc:hasPlumbingSystem home:EauVille ;
-  dhc:hasNetworkSegment home:ReseauLocal .
+  dhc:hasNetworkSegment home:ReseauLocal ;
+  dhc:hasElectricVehicle home:VoitureElectrique ;
+  dhc:hasChargingStation home:BorneRecharge .
 
 # ── Spatial: Areas & Floors ──
 
@@ -188,3 +190,18 @@ home:ReseauLocal
 home:WiFi
   a dhc:WiFiAccessPoint ;
   dhc:name "WiFi maison" .
+
+# ── E-Mobilité ──
+
+home:BorneRecharge
+  a dhc:ChargingStation ;
+  dhc:name "Borne de recharge garage" ;
+  dhc:chargingPower 7.4 ;
+  dhc:chargingType "wallbox 7kW" .
+
+home:VoitureElectrique
+  a dhc:ElectricCar ;
+  dhc:name "Voiture électrique familiale" ;
+  dhc:batteryCapacity 52.0 ;
+  dhc:vehicleRange 395.0 ;
+  dhc:chargedAt home:BorneRecharge .

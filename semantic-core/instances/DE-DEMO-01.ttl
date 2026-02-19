@@ -21,7 +21,10 @@ home:DE-DEMO-01
   dhc:hasArea home:Garden ;
   dhc:hasHVACSystem home:HeatingSystem ;
   dhc:hasPlumbingSystem home:WaterSystem ;
-  dhc:hasNetworkSegment home:HomeLAN .
+  dhc:hasNetworkSegment home:HomeLAN ;
+  dhc:hasElectricVehicle home:FamilyCar ;
+  dhc:hasElectricVehicle home:EBike ;
+  dhc:hasChargingStation home:Wallbox .
 
 # ── Spatial: Areas & Floors ──
 
@@ -192,3 +195,24 @@ home:WiFi
 home:ZigBee
   a dhc:ZigBeeSegment ;
   dhc:name "ZigBee Mesh" .
+
+# ── E-Mobility ──
+
+home:Wallbox
+  a dhc:ChargingStation ;
+  dhc:name "Garage Wallbox" ;
+  dhc:chargingPower 11.0 ;
+  dhc:chargingType "wallbox 11kW" .
+
+home:FamilyCar
+  a dhc:ElectricCar ;
+  dhc:name "Family Electric Car" ;
+  dhc:batteryCapacity 77.0 ;
+  dhc:vehicleRange 510.0 ;
+  dhc:chargedAt home:Wallbox .
+
+home:EBike
+  a dhc:ElectricBicycle ;
+  dhc:name "E-Bike" ;
+  dhc:batteryCapacity 0.5 ;
+  dhc:vehicleRange 80.0 .

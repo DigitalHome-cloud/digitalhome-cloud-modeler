@@ -11,7 +11,8 @@
 # This ontology defines the vocabulary for digital twins of
 # real estate properties. It covers spatial structure, building
 # envelope, electrical systems, plumbing, heating/HVAC,
-# data networks, equipment, and automation scenarios.
+# data networks, equipment, automation scenarios, and
+# e-mobility (electric vehicles and charging infrastructure).
 #
 # Design views (for the SmartHome Designer toolbox):
 #   - Spatial:    RealEstate → Area → Space hierarchy
@@ -612,6 +613,13 @@ dhc:powerRating
   rdfs:domain dhc:Equipment ;
   rdfs:range xsd:decimal .
 
+dhc:catalogRef
+  a owl:DatatypeProperty ;
+  rdfs:label "catalog reference"@en ;
+  rdfs:domain dhc:EquipmentType ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Reference to a product catalog entry (GraphQL ID or SKU)." .
+
 
 # ============================================================
 # SHARED: Automation
@@ -821,6 +829,101 @@ dhc:governedBy
   rdfs:label "governed by"@en ;
   rdfs:domain dhc:Circuit ;
   rdfs:range dhc:Guideline .
+
+
+# ============================================================
+# SHARED: E-Mobility
+# Electric vehicles and charging infrastructure
+# ============================================================
+
+dhc:ElectricVehicle
+  a owl:Class ;
+  rdfs:label "Electric Vehicle"@en ;
+  rdfs:label "Elektrofahrzeug"@de ;
+  rdfs:label "Véhicule électrique"@fr ;
+  rdfs:comment "An electrically powered vehicle associated with the property."@en .
+
+dhc:ElectricCar
+  a owl:Class ;
+  rdfs:subClassOf dhc:ElectricVehicle ;
+  rdfs:label "Electric Car"@en ;
+  rdfs:label "Elektroauto"@de ;
+  rdfs:label "Voiture électrique"@fr ;
+  rdfs:comment "A battery-electric or plug-in hybrid car."@en .
+
+dhc:ElectricBicycle
+  a owl:Class ;
+  rdfs:subClassOf dhc:ElectricVehicle ;
+  rdfs:label "Electric Bicycle"@en ;
+  rdfs:label "E-Bike"@de ;
+  rdfs:label "Vélo électrique"@fr ;
+  rdfs:comment "A pedal-assisted electric bicycle or e-bike."@en .
+
+dhc:ElectricScooter
+  a owl:Class ;
+  rdfs:subClassOf dhc:ElectricVehicle ;
+  rdfs:label "Electric Scooter"@en ;
+  rdfs:label "E-Roller"@de ;
+  rdfs:label "Trottinette électrique"@fr ;
+  rdfs:comment "An electric kick-scooter or moped."@en .
+
+dhc:ChargingStation
+  a owl:Class ;
+  rdfs:label "Charging Station"@en ;
+  rdfs:label "Ladestation"@de ;
+  rdfs:label "Borne de recharge"@fr ;
+  rdfs:comment "A charging point for electric vehicles: wallbox, standard outlet, or public charger."@en .
+
+# ── E-Mobility object properties ──
+
+dhc:hasElectricVehicle
+  a owl:ObjectProperty ;
+  rdfs:label "has electric vehicle"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range dhc:ElectricVehicle .
+
+dhc:hasChargingStation
+  a owl:ObjectProperty ;
+  rdfs:label "has charging station"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range dhc:ChargingStation .
+
+dhc:chargedAt
+  a owl:ObjectProperty ;
+  rdfs:label "charged at"@en ;
+  rdfs:domain dhc:ElectricVehicle ;
+  rdfs:range dhc:ChargingStation ;
+  rdfs:comment "The charging station used by this vehicle."@en .
+
+# ── E-Mobility data properties ──
+
+dhc:batteryCapacity
+  a owl:DatatypeProperty ;
+  rdfs:label "battery capacity (kWh)"@en ;
+  rdfs:domain dhc:ElectricVehicle ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Usable battery capacity in kilowatt-hours."@en .
+
+dhc:chargingPower
+  a owl:DatatypeProperty ;
+  rdfs:label "charging power (kW)"@en ;
+  rdfs:domain dhc:ChargingStation ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Maximum charging power in kilowatts."@en .
+
+dhc:chargingType
+  a owl:DatatypeProperty ;
+  rdfs:label "charging type"@en ;
+  rdfs:domain dhc:ChargingStation ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Type of charger: 230V outlet, wallbox 11kW, wallbox 22kW, DC fast charger."@en .
+
+dhc:vehicleRange
+  a owl:DatatypeProperty ;
+  rdfs:label "range (km)"@en ;
+  rdfs:domain dhc:ElectricVehicle ;
+  rdfs:range xsd:decimal ;
+  rdfs:comment "Estimated range on a full charge in kilometers."@en .
 
 
 # ============================================================

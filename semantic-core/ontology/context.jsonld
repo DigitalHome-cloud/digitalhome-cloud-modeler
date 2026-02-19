@@ -64,6 +64,12 @@
     "Scenario": "dhc:Scenario",
     "Guideline": "dhc:Guideline",
 
+    "ElectricVehicle": "dhc:ElectricVehicle",
+    "ElectricCar": "dhc:ElectricCar",
+    "ElectricBicycle": "dhc:ElectricBicycle",
+    "ElectricScooter": "dhc:ElectricScooter",
+    "ChargingStation": "dhc:ChargingStation",
+
     "hasArea": { "@id": "dhc:hasArea", "@type": "@id" },
     "hasFloor": { "@id": "dhc:hasFloor", "@type": "@id" },
     "hasSpace": { "@id": "dhc:hasSpace", "@type": "@id" },
@@ -91,6 +97,14 @@
     "setpointTemp": { "@id": "dhc:setpointTemp", "@type": "xsd:decimal" },
     "crossSection": { "@id": "dhc:crossSection", "@type": "xsd:decimal" },
     "uValue": { "@id": "dhc:uValue", "@type": "xsd:decimal" },
-    "pipeDiameter": { "@id": "dhc:pipeDiameter", "@type": "xsd:decimal" }
+    "pipeDiameter": { "@id": "dhc:pipeDiameter", "@type": "xsd:decimal" },
+
+    "hasElectricVehicle": { "@id": "dhc:hasElectricVehicle", "@type": "@id" },
+    "hasChargingStation": { "@id": "dhc:hasChargingStation", "@type": "@id" },
+    "chargedAt": { "@id": "dhc:chargedAt", "@type": "@id" },
+    "batteryCapacity": { "@id": "dhc:batteryCapacity", "@type": "xsd:decimal" },
+    "chargingPower": { "@id": "dhc:chargingPower", "@type": "xsd:decimal" },
+    "chargingType": "dhc:chargingType",
+    "vehicleRange": { "@id": "dhc:vehicleRange", "@type": "xsd:decimal" }
   }
 }
