@@ -7,6 +7,7 @@ const VIEW_COLORS = {
   plumbing: "#06b6d4",
   heating: "#ef4444",
   network: "#a855f7",
+  governance: "#f97316",
   automation: "#ec4899",
 };
 
@@ -17,6 +18,7 @@ const VIEW_LABELS = {
   plumbing: "Plumbing",
   heating: "Heating / HVAC",
   network: "Network",
+  governance: "Governance",
   automation: "Automation",
 };
 
@@ -27,13 +29,18 @@ const VIEW_ORDER = [
   "plumbing",
   "heating",
   "network",
+  "governance",
   "automation",
 ];
 
 const OntologySidebar = ({
   graphData,
-  activeView,
-  onViewChange,
+  visibleViews,
+  onToggleView,
+  onShowAll,
+  onHideAll,
+  showProperties,
+  onToggleProperties,
   onNodeSelect,
   selectedNode,
 }) => {
@@ -59,54 +66,103 @@ const OntologySidebar = ({
     setExpanded((prev) => ({ ...prev, [view]: !prev[view] }));
   };
 
-  const handleViewClick = (view) => {
-    onViewChange(activeView === view ? null : view);
+  const expandAll = () => {
+    const next = {};
+    for (const v of [...VIEW_ORDER, "shared"]) next[v] = true;
+    setExpanded(next);
+  };
+
+  const collapseAll = () => {
+    const next = {};
+    for (const v of [...VIEW_ORDER, "shared"]) next[v] = false;
+    setExpanded(next);
   };
 
   return (
     <div className="dhc-sidebar">
       <div className="dhc-sidebar-header">
         <span className="dhc-sidebar-title">Design Views</span>
-        {activeView && (
+        <div className="dhc-sidebar-header-actions">
           <button
             className="dhc-sidebar-clear"
-            onClick={() => onViewChange(null)}
+            onClick={onShowAll}
             title="Show all views"
           >
-            Clear
+            All
           </button>
-        )}
+          <button
+            className="dhc-sidebar-clear"
+            onClick={onHideAll}
+            title="Hide all views"
+          >
+            None
+          </button>
+        </div>
+      </div>
+      <div className="dhc-sidebar-controls">
+        <label className="dhc-sidebar-toggle">
+          <input
+            type="checkbox"
+            checked={showProperties}
+            onChange={onToggleProperties}
+          />
+          <span>Show Properties</span>
+        </label>
+        <div className="dhc-sidebar-controls-row">
+          <button
+            className="dhc-sidebar-clear"
+            onClick={expandAll}
+            title="Expand all sections"
+          >
+            Expand
+          </button>
+          <button
+            className="dhc-sidebar-clear"
+            onClick={collapseAll}
+            title="Collapse all sections"
+          >
+            Collapse
+          </button>
+        </div>
       </div>
       <div className="dhc-sidebar-body">
         {VIEW_ORDER.map((view) => {
           const group = grouped[view];
           if (!group) return null;
           const isExpanded = expanded[view] !== false; // default open
-          const isActive = activeView === view;
+          const isVisible = visibleViews.has(view);
 
           return (
             <div key={view} className="dhc-sidebar-section">
-              <button
-                className={`dhc-sidebar-section-header ${isActive ? "dhc-sidebar-section-header--active" : ""}`}
-                onClick={() => {
-                  toggleExpanded(view);
-                  handleViewClick(view);
-                }}
+              <div
+                className={`dhc-sidebar-section-header ${isVisible ? "dhc-sidebar-section-header--active" : ""}`}
               >
-                <span
-                  className="dhc-view-dot"
-                  style={{ background: VIEW_COLORS[view] }}
+                <input
+                  type="checkbox"
+                  className="dhc-sidebar-checkbox"
+                  checked={isVisible}
+                  onChange={() => onToggleView(view)}
+                  title={`Toggle ${VIEW_LABELS[view]}`}
                 />
-                <span className="dhc-sidebar-section-label">
-                  {VIEW_LABELS[view]}
-                </span>
-                <span className="dhc-sidebar-section-count">
-                  {group.classes.length + group.properties.length}
-                </span>
-                <span className={`dhc-sidebar-chevron ${isExpanded ? "dhc-sidebar-chevron--open" : ""}`}>
-                  &#9654;
-                </span>
-              </button>
+                <button
+                  className="dhc-sidebar-section-btn"
+                  onClick={() => toggleExpanded(view)}
+                >
+                  <span
+                    className="dhc-view-dot"
+                    style={{ background: VIEW_COLORS[view] }}
+                  />
+                  <span className="dhc-sidebar-section-label">
+                    {VIEW_LABELS[view]}
+                  </span>
+                  <span className="dhc-sidebar-section-count">
+                    {group.classes.length + group.properties.length}
+                  </span>
+                  <span className={`dhc-sidebar-chevron ${isExpanded ? "dhc-sidebar-chevron--open" : ""}`}>
+                    &#9654;
+                  </span>
+                </button>
+              </div>
               {isExpanded && (
                 <div className="dhc-sidebar-items">
                   {group.classes.length > 0 && (
@@ -150,23 +206,25 @@ const OntologySidebar = ({
         {/* Shared (no view) */}
         {grouped["shared"] && (
           <div className="dhc-sidebar-section">
-            <button
-              className="dhc-sidebar-section-header"
-              onClick={() => toggleExpanded("shared")}
-            >
-              <span
-                className="dhc-view-dot"
-                style={{ background: "#e5e7eb" }}
-              />
-              <span className="dhc-sidebar-section-label">Shared</span>
-              <span className="dhc-sidebar-section-count">
-                {(grouped["shared"].classes?.length || 0) +
-                  (grouped["shared"].properties?.length || 0)}
-              </span>
-              <span className={`dhc-sidebar-chevron ${expanded["shared"] !== false ? "dhc-sidebar-chevron--open" : ""}`}>
-                &#9654;
-              </span>
-            </button>
+            <div className="dhc-sidebar-section-header">
+              <button
+                className="dhc-sidebar-section-btn"
+                onClick={() => toggleExpanded("shared")}
+              >
+                <span
+                  className="dhc-view-dot"
+                  style={{ background: "#e5e7eb" }}
+                />
+                <span className="dhc-sidebar-section-label">Shared</span>
+                <span className="dhc-sidebar-section-count">
+                  {(grouped["shared"].classes?.length || 0) +
+                    (grouped["shared"].properties?.length || 0)}
+                </span>
+                <span className={`dhc-sidebar-chevron ${expanded["shared"] !== false ? "dhc-sidebar-chevron--open" : ""}`}>
+                  &#9654;
+                </span>
+              </button>
+            </div>
             {expanded["shared"] !== false && (
               <div className="dhc-sidebar-items">
                 {grouped["shared"].classes.map((node) => (

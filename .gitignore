@@ -14,6 +14,12 @@ build/
 # Amplify — never commit
 src/aws-exports.js
 
+# Real SmartHome instances — contain personal address data, keep local only
+# Demo instances (*-DEMO-*.ttl) are safe to commit
+semantic-core/instances/DE-[0-9]*.ttl
+semantic-core/instances/FR-[0-9]*.ttl
+semantic-core/instances/BE-[0-9]*.ttl
+
 # OS
 .DS_Store
 

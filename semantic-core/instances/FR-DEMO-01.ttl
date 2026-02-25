@@ -1,0 +1,207 @@
+@prefix dhc:  <https://digitalhome.cloud/ontology#> .
+@prefix home: <https://digitalhome.cloud/instances/FR-DEMO-01#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# ============================================================
+# FR-DEMO-01 — Demo French maison (ABox)
+#
+# A typical French suburban house with electric heating,
+# French electrical norms (différentiel + disjoncteurs),
+# and French room naming conventions.
+# ============================================================
+
+# ── The property itself ──
+
+home:FR-DEMO-01
+  a dhc:RealEstate ;
+  dhc:smartHomeId "FR-DEMO-01" ;
+  dhc:name "Demo Maison France" ;
+  dhc:description "Une maison de démonstration française pour la plateforme DigitalHome.Cloud." ;
+  dhc:hasArea home:Batiment ;
+  dhc:hasArea home:Jardin ;
+  dhc:hasHVACSystem home:ChauffageElectrique ;
+  dhc:hasPlumbingSystem home:EauVille ;
+  dhc:hasNetworkSegment home:ReseauLocal ;
+  dhc:hasElectricVehicle home:VoitureElectrique ;
+  dhc:hasChargingStation home:BorneRecharge .
+
+# ── Spatial: Areas & Floors ──
+
+home:Batiment
+  a dhc:Area ;
+  dhc:name "Bâtiment principal" ;
+  dhc:hasFloor home:RezDeChaussee ;
+  dhc:hasFloor home:Etage .
+
+home:Jardin
+  a dhc:Area ;
+  dhc:name "Jardin" .
+
+home:RezDeChaussee
+  a dhc:Floor ;
+  dhc:name "Rez-de-chaussée" ;
+  dhc:floorLevel 0 ;
+  dhc:hasSpace home:Salon ;
+  dhc:hasSpace home:Cuisine ;
+  dhc:hasSpace home:Couloir .
+
+home:Etage
+  a dhc:Floor ;
+  dhc:name "Premier étage" ;
+  dhc:floorLevel 1 ;
+  dhc:hasSpace home:Chambre ;
+  dhc:hasSpace home:SalleDeBains .
+
+# ── Spatial: Spaces ──
+
+home:Salon
+  a dhc:Space ;
+  dhc:name "Salon" ;
+  dhc:areaM2 32.0 ;
+  dhc:hasEquipment home:SAL_Lumiere1 ;
+  dhc:hasEquipment home:SAL_Prise1 ;
+  dhc:hasEquipment home:SAL_Radiateur .
+
+home:Cuisine
+  a dhc:Space ;
+  dhc:name "Cuisine" ;
+  dhc:areaM2 12.0 ;
+  dhc:hasEquipment home:CUI_Lumiere1 ;
+  dhc:hasEquipment home:CUI_Prise1 ;
+  dhc:hasFixture home:CUI_Evier .
+
+home:Couloir
+  a dhc:Space ;
+  dhc:name "Couloir" ;
+  dhc:areaM2 6.0 .
+
+home:Chambre
+  a dhc:Space ;
+  dhc:name "Chambre" ;
+  dhc:areaM2 16.0 ;
+  dhc:hasEquipment home:CH_Lumiere1 ;
+  dhc:hasEquipment home:CH_Radiateur .
+
+home:SalleDeBains
+  a dhc:Space ;
+  dhc:name "Salle de bains" ;
+  dhc:areaM2 7.5 ;
+  dhc:hasFixture home:SDB_Douche ;
+  dhc:hasFixture home:SDB_WC ;
+  dhc:hasFixture home:SDB_Lavabo .
+
+# ── Electrical: Distribution & Circuits ──
+
+home:TableauPrincipal
+  a dhc:DistributionBoard ;
+  dhc:name "Tableau général" ;
+  dhc:hasCircuit home:CircuitEclairage ;
+  dhc:hasCircuit home:CircuitPrises ;
+  dhc:hasCircuit home:CircuitCuisine .
+
+home:CircuitEclairage
+  a dhc:Circuit ;
+  dhc:name "Éclairage RdC" ;
+  dhc:maxPoints 8 ;
+  dhc:hasProtection home:Diff_Eclairage ;
+  dhc:feedsEquipment home:SAL_Lumiere1 ;
+  dhc:feedsEquipment home:CUI_Lumiere1 .
+
+home:CircuitPrises
+  a dhc:Circuit ;
+  dhc:name "Prises RdC" ;
+  dhc:maxPoints 8 ;
+  dhc:hasProtection home:Disj_Prises ;
+  dhc:feedsEquipment home:SAL_Prise1 .
+
+home:CircuitCuisine
+  a dhc:Circuit ;
+  dhc:name "Cuisine dédié" ;
+  dhc:hasProtection home:Disj_Cuisine ;
+  dhc:feedsEquipment home:CUI_Prise1 .
+
+home:Diff_Eclairage
+  a dhc:ProtectionDevice ;
+  dhc:name "Différentiel éclairage 30mA" ;
+  dhc:ratedCurrent 10.0 .
+
+home:Disj_Prises
+  a dhc:ProtectionDevice ;
+  dhc:name "Disjoncteur prises 16A" ;
+  dhc:ratedCurrent 16.0 .
+
+home:Disj_Cuisine
+  a dhc:ProtectionDevice ;
+  dhc:name "Disjoncteur cuisine 20A" ;
+  dhc:ratedCurrent 20.0 .
+
+# ── Equipment instances ──
+
+home:SAL_Lumiere1  a dhc:Light  ; dhc:name "Plafonnier salon" ; dhc:powerRating 60.0 .
+home:SAL_Prise1    a dhc:Socket ; dhc:name "Prise salon" .
+home:CUI_Lumiere1  a dhc:Light  ; dhc:name "Plafonnier cuisine" ; dhc:powerRating 40.0 .
+home:CUI_Prise1    a dhc:Socket ; dhc:name "Prise plan de travail" .
+home:CH_Lumiere1   a dhc:Light  ; dhc:name "Plafonnier chambre" ; dhc:powerRating 40.0 .
+
+# ── Heating (electric radiators, typical French) ──
+
+home:ChauffageElectrique
+  a dhc:HVACSystem ;
+  dhc:name "Chauffage électrique" .
+
+home:SAL_Radiateur
+  a dhc:HeatEmitter ;
+  dhc:name "Radiateur salon" ;
+  dhc:heatsSpace home:Salon ;
+  dhc:controlledBy home:SAL_Thermostat .
+
+home:SAL_Thermostat
+  a dhc:Thermostat ;
+  dhc:name "Thermostat salon" ;
+  dhc:setpointTemp 21.0 .
+
+home:CH_Radiateur
+  a dhc:HeatEmitter ;
+  dhc:name "Radiateur chambre" ;
+  dhc:controlledBy home:CH_Thermostat .
+
+home:CH_Thermostat
+  a dhc:Thermostat ;
+  dhc:name "Thermostat chambre" ;
+  dhc:setpointTemp 19.0 .
+
+# ── Plumbing ──
+
+home:EauVille
+  a dhc:WaterSupply ;
+  dhc:name "Alimentation eau de ville" .
+
+home:CUI_Evier   a dhc:PlumbingFixture ; dhc:name "Évier cuisine" .
+home:SDB_Douche  a dhc:PlumbingFixture ; dhc:name "Douche" .
+home:SDB_WC      a dhc:PlumbingFixture ; dhc:name "WC" .
+home:SDB_Lavabo  a dhc:PlumbingFixture ; dhc:name "Lavabo" .
+
+# ── Network ──
+
+home:ReseauLocal
+  a dhc:EthernetSegment ;
+  dhc:name "Réseau local" .
+
+home:WiFi
+  a dhc:WiFiAccessPoint ;
+  dhc:name "WiFi maison" .
+
+# ── E-Mobilité ──
+
+home:BorneRecharge
+  a dhc:ChargingStation ;
+  dhc:name "Borne de recharge garage" ;
+  dhc:chargingPower 7.4 ;
+  dhc:chargingType "wallbox 7kW" .
+
+home:VoitureElectrique
+  a dhc:ElectricCar ;
+  dhc:name "Voiture électrique familiale" ;
+  dhc:batteryCapacity 52.0 ;
+  dhc:vehicleRange 395.0 ;
+  dhc:chargedAt home:BorneRecharge .
