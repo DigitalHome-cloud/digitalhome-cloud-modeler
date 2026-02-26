@@ -1,0 +1,20 @@
+{
+  "scope": ["spatial", "electrical", "shared"],
+  "sharedClasses": ["Equipment", "EquipmentType"],
+  "viewOverrides": {
+    "Heater": "electrical"
+  },
+  "dropdowns": {
+    "ratedCurrent": [
+      ["10 A", "10"],
+      ["16 A", "16"],
+      ["20 A", "20"],
+      ["25 A", "25"],
+      ["32 A", "32"]
+    ]
+  },
+  "defaults": {
+    "maxPoints": 8,
+    "floorLevel": 0
+  }
+}

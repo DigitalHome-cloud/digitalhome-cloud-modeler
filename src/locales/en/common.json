@@ -25,6 +25,7 @@
   "library.field.standards": "Standards",
   "library.field.description": "Description",
   "library.field.compatibleClasses": "Compatible Classes",
+  "library.field.capabilities": "Capabilities",
   "library.save": "Save",
   "library.cancel": "Cancel",
   "footer.tagline": "Nature meets technology \u2013 DigitalHome.Cloud"

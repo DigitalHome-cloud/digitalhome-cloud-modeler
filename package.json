@@ -40,6 +40,7 @@
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "parse-ontology": "node scripts/parse-ontology.js",
+    "generate-blockly-toolbox": "node scripts/generate-blockly-toolbox.js",
     "publish-ontology": "node scripts/publish-ontology.js",
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
   },

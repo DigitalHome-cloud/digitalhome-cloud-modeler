@@ -24,6 +24,8 @@ const CONTEXT_PATH = path.resolve(
   __dirname,
   "../semantic-core/ontology/context.jsonld"
 );
+const BLOCKLY_BLOCKS_PATH = path.resolve(__dirname, "../src/data/blockly-blocks.json");
+const BLOCKLY_TOOLBOX_PATH = path.resolve(__dirname, "../src/data/blockly-toolbox.json");
 
 // Read ontology graph and extract version
 const graphJson = fs.readFileSync(GRAPH_PATH, "utf-8");
@@ -43,6 +45,15 @@ if (!fs.existsSync(CONTEXT_PATH)) {
   process.exit(1);
 }
 const contextJson = fs.readFileSync(CONTEXT_PATH, "utf-8");
+
+// Read blockly artifacts (optional — only uploaded if they exist)
+const hasBlocklyArtifacts =
+  fs.existsSync(BLOCKLY_BLOCKS_PATH) && fs.existsSync(BLOCKLY_TOOLBOX_PATH);
+let blocklyBlocksJson, blocklyToolboxJson;
+if (hasBlocklyArtifacts) {
+  blocklyBlocksJson = fs.readFileSync(BLOCKLY_BLOCKS_PATH, "utf-8");
+  blocklyToolboxJson = fs.readFileSync(BLOCKLY_TOOLBOX_PATH, "utf-8");
+}
 
 const s3 = new S3Client({ region: REGION });
 
@@ -83,6 +94,31 @@ async function main() {
     contextJson,
     "application/ld+json"
   );
+
+  // Blockly toolbox artifacts
+  if (hasBlocklyArtifacts) {
+    console.log("\nPublishing Blockly toolbox artifacts...");
+    await upload(
+      `public/ontology/v${version}/blockly-blocks.json`,
+      blocklyBlocksJson,
+      "application/json"
+    );
+    await upload(
+      `public/ontology/v${version}/blockly-toolbox.json`,
+      blocklyToolboxJson,
+      "application/json"
+    );
+    await upload(
+      "public/ontology/latest/blockly-blocks.json",
+      blocklyBlocksJson,
+      "application/json"
+    );
+    await upload(
+      "public/ontology/latest/blockly-toolbox.json",
+      blocklyToolboxJson,
+      "application/json"
+    );
+  }
 
   console.log(`\nDone. Ontology v${version} published.`);
 }

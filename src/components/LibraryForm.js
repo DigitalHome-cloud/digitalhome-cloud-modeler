@@ -50,6 +50,15 @@ const LibraryForm = ({ item, onClose, onSaved }) => {
   const [selectedClasses, setSelectedClasses] = React.useState(
     new Set(item?.compatibleClasses || [])
   );
+  const [hasActorCapability, setHasActorCapability] = React.useState(
+    item?.hasActorCapability || false
+  );
+  const [hasSensorCapability, setHasSensorCapability] = React.useState(
+    item?.hasSensorCapability || false
+  );
+  const [hasControllerCapability, setHasControllerCapability] = React.useState(
+    item?.hasControllerCapability || false
+  );
   const [saving, setSaving] = React.useState(false);
 
   const toggleClass = (cls) => {
@@ -78,6 +87,9 @@ const LibraryForm = ({ item, onClose, onSaved }) => {
         .filter(Boolean),
       description: description.trim() || null,
       compatibleClasses: [...selectedClasses],
+      hasActorCapability,
+      hasSensorCapability,
+      hasControllerCapability,
     };
 
     try {
@@ -156,6 +168,36 @@ const LibraryForm = ({ item, onClose, onSaved }) => {
             rows={3}
           />
         </label>
+
+        <div className="dhc-library-form-capabilities">
+          <div className="dhc-library-form-label">Device Capabilities</div>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
+            <label className="dhc-library-form-class-item">
+              <input
+                type="checkbox"
+                checked={hasActorCapability}
+                onChange={(e) => setHasActorCapability(e.target.checked)}
+              />
+              <span>Actor</span>
+            </label>
+            <label className="dhc-library-form-class-item">
+              <input
+                type="checkbox"
+                checked={hasSensorCapability}
+                onChange={(e) => setHasSensorCapability(e.target.checked)}
+              />
+              <span>Sensor</span>
+            </label>
+            <label className="dhc-library-form-class-item">
+              <input
+                type="checkbox"
+                checked={hasControllerCapability}
+                onChange={(e) => setHasControllerCapability(e.target.checked)}
+              />
+              <span>Controller</span>
+            </label>
+          </div>
+        </div>
 
         <div className="dhc-library-form-classes">
           <div className="dhc-library-form-label">

@@ -133,6 +133,17 @@ const LibraryList = () => {
                     {item.description && (
                       <div className="dhc-library-desc">{item.description}</div>
                     )}
+                    <div className="dhc-library-capability-badges">
+                      {item.hasActorCapability && (
+                        <span className="dhc-capability-badge dhc-capability-badge--actor">A</span>
+                      )}
+                      {item.hasSensorCapability && (
+                        <span className="dhc-capability-badge dhc-capability-badge--sensor">S</span>
+                      )}
+                      {item.hasControllerCapability && (
+                        <span className="dhc-capability-badge dhc-capability-badge--controller">C</span>
+                      )}
+                    </div>
                   </td>
                   <td>{item.version}</td>
                   <td>
