@@ -6,7 +6,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
 # ============================================================
-# DigitalHome.Cloud Core Ontology — v0.1.0
+# DigitalHome.Cloud Core Ontology — v1.0.0
 #
 # This ontology defines the vocabulary for digital twins of
 # real estate properties. It covers spatial structure, building
@@ -34,7 +34,7 @@
   a owl:Ontology ;
   rdfs:label "DigitalHome.Cloud Core Ontology"@en ;
   dcterms:description "Semantic foundation for digital twins of real estate properties."@en ;
-  owl:versionInfo "0.1.0" ;
+  owl:versionInfo "1.0.0" ;
   dcterms:creator "D-LAB-5 / DigitalHome.Cloud" ;
   dcterms:license <https://opensource.org/licenses/MIT> .
 
@@ -843,30 +843,6 @@ dhc:ElectricVehicle
   rdfs:label "Véhicule électrique"@fr ;
   rdfs:comment "An electrically powered vehicle associated with the property."@en .
 
-dhc:ElectricCar
-  a owl:Class ;
-  rdfs:subClassOf dhc:ElectricVehicle ;
-  rdfs:label "Electric Car"@en ;
-  rdfs:label "Elektroauto"@de ;
-  rdfs:label "Voiture électrique"@fr ;
-  rdfs:comment "A battery-electric or plug-in hybrid car."@en .
-
-dhc:ElectricBicycle
-  a owl:Class ;
-  rdfs:subClassOf dhc:ElectricVehicle ;
-  rdfs:label "Electric Bicycle"@en ;
-  rdfs:label "E-Bike"@de ;
-  rdfs:label "Vélo électrique"@fr ;
-  rdfs:comment "A pedal-assisted electric bicycle or e-bike."@en .
-
-dhc:ElectricScooter
-  a owl:Class ;
-  rdfs:subClassOf dhc:ElectricVehicle ;
-  rdfs:label "Electric Scooter"@en ;
-  rdfs:label "E-Roller"@de ;
-  rdfs:label "Trottinette électrique"@fr ;
-  rdfs:comment "An electric kick-scooter or moped."@en .
-
 dhc:ChargingStation
   a owl:Class ;
   rdfs:label "Charging Station"@en ;
@@ -896,6 +872,15 @@ dhc:chargedAt
   rdfs:comment "The charging station used by this vehicle."@en .
 
 # ── E-Mobility data properties ──
+
+dhc:vehicleType
+  a owl:DatatypeProperty ;
+  rdfs:label "vehicle type"@en ;
+  rdfs:label "Fahrzeugtyp"@de ;
+  rdfs:label "type de véhicule"@fr ;
+  rdfs:domain dhc:ElectricVehicle ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Type of electric vehicle: car, bicycle, scooter, etc. Instances are created in the A-Box."@en .
 
 dhc:batteryCapacity
   a owl:DatatypeProperty ;

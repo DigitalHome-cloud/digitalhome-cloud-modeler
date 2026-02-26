@@ -1,14 +1,19 @@
 import * as React from "react";
 import { Link } from "gatsby";
-import { useTranslation } from "gatsby-plugin-react-i18next";
+import { useTranslation, useI18next } from "gatsby-plugin-react-i18next";
+import { useAuth } from "../context/AuthContext";
 
 const portalUrl =
   process.env.GATSBY_PORTAL_URL || "https://portal.digitalhome.cloud";
-const designerUrl =
-  process.env.GATSBY_DESIGNER_URL || "https://designer.digitalhome.cloud";
 
 const Header = () => {
   const { t } = useTranslation();
+  const { languages, language, changeLanguage } = useI18next();
+  const { authState, isAuthenticated, user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <header className="dhc-header">
@@ -24,22 +29,61 @@ const Header = () => {
         <nav className="dhc-nav">
           <div className="dhc-nav-group">
             <Link to="/" className="dhc-nav-link">
-              {t("nav.home")}
+              {t("nav.modeler")}
+            </Link>
+            <Link to="/library/" className="dhc-nav-link">
+              {t("nav.library")}
             </Link>
             <a href={portalUrl} className="dhc-nav-link">
               {t("nav.portal")}
             </a>
-            <a href={designerUrl} className="dhc-nav-link">
-              {t("nav.designer")}
-            </a>
-            <a
-              href="https://github.com/DigitalHome-cloud"
-              className="dhc-nav-link"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t("nav.github")}
-            </a>
+          </div>
+
+          <div className="dhc-nav-group dhc-nav-auth">
+            {authState === "demo" && (
+              <>
+                <span className="dhc-nav-pill">DEMO</span>
+                <Link to="/signin/" className="dhc-nav-link">
+                  Sign In
+                </Link>
+              </>
+            )}
+
+            {isAuthenticated && (
+              <>
+                <span className="dhc-nav-pill dhc-nav-pill--ok">
+                  {user?.idTokenPayload?.name ||
+                    user?.idTokenPayload?.email ||
+                    user?.username ||
+                    "Signed in"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="dhc-nav-link dhc-nav-link-button"
+                >
+                  Sign out
+                </button>
+              </>
+            )}
+
+            {/* Language switcher */}
+            <div className="dhc-lang-switch">
+              {languages.map((lng) => (
+                <button
+                  key={lng}
+                  type="button"
+                  onClick={() => changeLanguage(lng)}
+                  className={
+                    language === lng
+                      ? "dhc-lang-btn dhc-lang-btn--active"
+                      : "dhc-lang-btn"
+                  }
+                >
+                  {lng.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
         </nav>
       </div>

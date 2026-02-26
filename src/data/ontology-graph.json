@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "version": "1.0.0",
+    "label": "DigitalHome.Cloud Core Ontology"
+  },
   "nodes": [
     {
       "id": "dhc:RealEstate",
@@ -755,27 +759,6 @@
       "comment": "An electrically powered vehicle associated with the property."
     },
     {
-      "id": "dhc:ElectricCar",
-      "label": "Electric Car",
-      "type": "class",
-      "comment": "A battery-electric or plug-in hybrid car.",
-      "superClass": "dhc:ElectricVehicle"
-    },
-    {
-      "id": "dhc:ElectricBicycle",
-      "label": "Electric Bicycle",
-      "type": "class",
-      "comment": "A pedal-assisted electric bicycle or e-bike.",
-      "superClass": "dhc:ElectricVehicle"
-    },
-    {
-      "id": "dhc:ElectricScooter",
-      "label": "Electric Scooter",
-      "type": "class",
-      "comment": "An electric kick-scooter or moped.",
-      "superClass": "dhc:ElectricVehicle"
-    },
-    {
       "id": "dhc:ChargingStation",
       "label": "Charging Station",
       "type": "class",
@@ -802,6 +785,14 @@
       "comment": "The charging station used by this vehicle.",
       "domain": "dhc:ElectricVehicle",
       "range": "dhc:ChargingStation"
+    },
+    {
+      "id": "dhc:vehicleType",
+      "label": "vehicle type",
+      "type": "datatypeProperty",
+      "comment": "Type of electric vehicle: car, bicycle, scooter, etc. Instances are created in the A-Box.",
+      "domain": "dhc:ElectricVehicle",
+      "range": "xsd:string"
     },
     {
       "id": "dhc:batteryCapacity",
@@ -1237,24 +1228,6 @@
       "type": "objectProperty"
     },
     {
-      "source": "dhc:ElectricCar",
-      "target": "dhc:ElectricVehicle",
-      "label": "subClassOf",
-      "type": "subClassOf"
-    },
-    {
-      "source": "dhc:ElectricBicycle",
-      "target": "dhc:ElectricVehicle",
-      "label": "subClassOf",
-      "type": "subClassOf"
-    },
-    {
-      "source": "dhc:ElectricScooter",
-      "target": "dhc:ElectricVehicle",
-      "label": "subClassOf",
-      "type": "subClassOf"
-    },
-    {
       "source": "dhc:RealEstate",
       "target": "dhc:ElectricVehicle",
       "label": "has electric vehicle",
@@ -1271,6 +1244,12 @@
       "target": "dhc:ChargingStation",
       "label": "charged at",
       "type": "objectProperty"
+    },
+    {
+      "source": "dhc:vehicleType",
+      "target": "dhc:ElectricVehicle",
+      "label": "domain",
+      "type": "domain"
     },
     {
       "source": "dhc:batteryCapacity",

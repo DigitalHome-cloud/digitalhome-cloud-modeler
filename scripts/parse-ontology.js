@@ -20,6 +20,18 @@ const ttl = fs.readFileSync(TTL_PATH, "utf-8");
 // Split into blocks separated by blank lines
 const blocks = ttl.split(/\n\s*\n/);
 
+// Extract ontology-level metadata from the owl:Ontology block
+const meta = { version: null, label: null };
+for (const block of blocks) {
+  if (block.includes("a owl:Ontology")) {
+    const versionMatch = block.match(/owl:versionInfo\s+"([^"]+)"/);
+    if (versionMatch) meta.version = versionMatch[1];
+    const labelMatch = block.match(/rdfs:label\s+"([^"]+)"(?:@\w+)?/);
+    if (labelMatch) meta.label = labelMatch[1];
+    break;
+  }
+}
+
 const nodes = [];
 const links = [];
 const nodeIds = new Set();
@@ -146,7 +158,7 @@ for (const node of nodes) {
   }
 }
 
-const graph = { nodes, links };
+const graph = { meta, nodes, links };
 
 fs.writeFileSync(OUT_PATH, JSON.stringify(graph, null, 2));
 

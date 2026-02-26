@@ -32,6 +32,7 @@ const WorkspaceShell = () => {
     <div className="dhc-workspace dhc-workspace--three-columns">
       <OntologySidebar
         graphData={graphData}
+        meta={graphData.meta}
         visibleViews={visibleViews}
         onToggleView={toggleView}
         onShowAll={showAllViews}

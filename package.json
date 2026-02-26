@@ -2,9 +2,11 @@
   "name": "digitalhome-cloud-modeler",
   "private": true,
   "description": "3D ontology viewer for the DigitalHome.Cloud platform",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "author": "D-LAB-5",
   "dependencies": {
+    "@aws-amplify/ui-react": "^6.1.0",
+    "aws-amplify": "^6.3.0",
     "gatsby": "^5.14.6",
     "gatsby-plugin-image": "^3.14.0",
     "gatsby-plugin-manifest": "^5.14.0",
@@ -23,6 +25,7 @@
     "three": "0.170.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.600.0",
     "prettier": "^2.8.8"
   },
   "keywords": [
@@ -37,6 +40,7 @@
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "parse-ontology": "node scripts/parse-ontology.js",
+    "publish-ontology": "node scripts/publish-ontology.js",
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
   },
   "repository": {

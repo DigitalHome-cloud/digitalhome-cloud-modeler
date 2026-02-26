@@ -35,6 +35,7 @@ const VIEW_ORDER = [
 
 const OntologySidebar = ({
   graphData,
+  meta,
   visibleViews,
   onToggleView,
   onShowAll,
@@ -80,6 +81,11 @@ const OntologySidebar = ({
 
   return (
     <div className="dhc-sidebar">
+      {meta?.version && (
+        <div className="dhc-sidebar-version">
+          Ontology v{meta.version}
+        </div>
+      )}
       <div className="dhc-sidebar-header">
         <span className="dhc-sidebar-title">Design Views</span>
         <div className="dhc-sidebar-header-actions">
