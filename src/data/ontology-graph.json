@@ -1,7 +1,19 @@
 {
   "meta": {
-    "version": "1.0.0",
-    "label": "DigitalHome.Cloud Core Ontology"
+    "version": "1.1.0",
+    "label": "DigitalHome.Cloud Core Ontology",
+    "modules": [
+      {
+        "id": "dhc-nfc14100-electrical",
+        "version": "1.0.0",
+        "label": "NF C 14-100 Electrical Delivery"
+      },
+      {
+        "id": "dhc-nfc15100-electrical",
+        "version": "1.0.0",
+        "label": "NF C 15-100 Electrical Installation"
+      }
+    ]
   },
   "nodes": [
     {
@@ -192,6 +204,42 @@
       "comment": "A run of cable between two points."
     },
     {
+      "id": "dhc:ElectricalTechnicalSpace",
+      "label": "Electrical Technical Space",
+      "type": "class",
+      "view": "electrical",
+      "comment": "A generic technical space for electrical installation (e.g. GTL, electrical closet).",
+      "superClass": "dhc:Space"
+    },
+    {
+      "id": "dhc:EnergyDelivery",
+      "label": "Energy Delivery",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Root entry point: contractual and physical energy supply to the property."
+    },
+    {
+      "id": "dhc:EnergyMeter",
+      "label": "Energy Meter",
+      "type": "class",
+      "view": "electrical",
+      "comment": "A metering device measuring energy consumption."
+    },
+    {
+      "id": "dhc:EmergencyDisconnect",
+      "label": "Emergency Disconnect",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Emergency or general disconnect device."
+    },
+    {
+      "id": "dhc:Distribution",
+      "label": "Distribution",
+      "type": "class",
+      "view": "electrical",
+      "comment": "An intermediate distribution node (junction box, sub-distribution)."
+    },
+    {
       "id": "dhc:hasCircuit",
       "label": "has circuit",
       "type": "objectProperty",
@@ -232,6 +280,21 @@
       "range": "dhc:WiringSegment"
     },
     {
+      "id": "dhc:feeds",
+      "label": "feeds",
+      "type": "objectProperty",
+      "view": "electrical",
+      "comment": "Generic upstream-to-downstream topology link in the electrical delivery chain."
+    },
+    {
+      "id": "dhc:locatedIn",
+      "label": "located in",
+      "type": "objectProperty",
+      "view": "electrical",
+      "comment": "Physical location of a device or component within a space.",
+      "range": "dhc:Space"
+    },
+    {
       "id": "dhc:ratedCurrent",
       "label": "rated current (A)",
       "type": "datatypeProperty",
@@ -255,6 +318,66 @@
       "comment": "Maximum number of endpoints (governed by national standards).",
       "domain": "dhc:Circuit",
       "range": "xsd:integer"
+    },
+    {
+      "id": "dhc:energyProviderName",
+      "label": "energy provider name",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "domain": "dhc:EnergyDelivery",
+      "range": "xsd:string"
+    },
+    {
+      "id": "dhc:currentType",
+      "label": "current type",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "comment": "SinglePhase or ThreePhase.",
+      "domain": "dhc:EnergyDelivery",
+      "range": "xsd:string"
+    },
+    {
+      "id": "dhc:neutralSystem",
+      "label": "neutral system",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "comment": "Star (TT, TN-S, TN-C, IT).",
+      "domain": "dhc:EnergyDelivery",
+      "range": "xsd:string"
+    },
+    {
+      "id": "dhc:contractedPowerKVA",
+      "label": "contracted power (kVA)",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "domain": "dhc:EnergyDelivery",
+      "range": "xsd:decimal"
+    },
+    {
+      "id": "dhc:phase",
+      "label": "phase",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "comment": "Phase assignment: 1, 2, or 3.",
+      "domain": "dhc:Circuit",
+      "range": "xsd:integer"
+    },
+    {
+      "id": "dhc:distributionBoardType",
+      "label": "distribution board type",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "comment": "ACBoard, DCBoard, or CommunicationBoard.",
+      "domain": "dhc:DistributionBoard",
+      "range": "xsd:string"
+    },
+    {
+      "id": "dhc:wiring",
+      "label": "wiring",
+      "type": "datatypeProperty",
+      "view": "electrical",
+      "comment": "Cable specification, e.g. 3G2.5, 5G6.",
+      "range": "xsd:string"
     },
     {
       "id": "dhc:PlumbingSystem",
@@ -846,6 +969,204 @@
       "comment": "Tenant partition key. Format: {country}-{zip}-{street3}{number}-{nn} e.g. DE-80331-MAR12-01.",
       "domain": "dhc:RealEstate",
       "range": "xsd:string"
+    },
+    {
+      "id": "dhc-nfc14100:NF14EnergyMeter",
+      "label": "NF14 Energy Meter",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Energy meter as defined by NF C 14-100 (compteur Enedis/EDF).",
+      "superClass": "dhc:EnergyMeter",
+      "module": "dhc-nfc14100-electrical"
+    },
+    {
+      "id": "dhc-nfc14100:NF14EmergencyDisconnect",
+      "label": "NF14 Emergency Disconnect",
+      "type": "class",
+      "view": "electrical",
+      "comment": "General emergency disconnect as defined by NF C 14-100 (AGCP / disjoncteur de branchement).",
+      "superClass": "dhc:EmergencyDisconnect",
+      "module": "dhc-nfc14100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:GTL",
+      "label": "GTL",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Gaine Technique Logement — mandatory technical enclosure per NF C 15-100.",
+      "superClass": "dhc:ElectricalTechnicalSpace",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:LightingCircuit",
+      "label": "Lighting Circuit",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Lighting circuit: max 8 points, 10A breaker, 1.5mm² wiring (3G1.5).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:SocketCircuit16A_8Sockets",
+      "label": "Socket Circuit 16A (8 sockets)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Standard socket circuit: max 8 sockets, 16A breaker, 1.5mm² wiring.",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:SocketCircuit20A_12Sockets",
+      "label": "Socket Circuit 20A (12 sockets)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Extended socket circuit: max 12 sockets, 20A breaker, 2.5mm² wiring.",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:KitchenSocketCircuit20A_6Sockets_Dedicated",
+      "label": "Kitchen Socket Circuit 20A (6 sockets, dedicated)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Dedicated kitchen socket circuit: max 6 sockets, 20A breaker, 2.5mm² wiring.",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:SpecializedApplianceCircuit20A_Dedicated",
+      "label": "Specialized Appliance Circuit 20A (dedicated)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Dedicated circuit for specialized appliances (dishwasher, dryer, freezer): 1 point, 20A breaker, 2.5mm².",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:WaterHeaterCircuit20A_Dedicated",
+      "label": "Water Heater Circuit 20A (dedicated)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Dedicated water heater circuit: 1 point, 20A breaker, 2.5mm².",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:CookingCircuitMono32A_Dedicated",
+      "label": "Cooking Circuit Mono 32A (dedicated)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Dedicated single-phase cooking circuit: 1 point, 32A breaker, 6mm² (3G6).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:CookingCircuitTri20A_Dedicated",
+      "label": "Cooking Circuit Tri 20A (dedicated)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Dedicated three-phase cooking circuit: 1 point, 20A breaker, 2.5mm² (5G2.5).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:HeatingWallEmitters3500W",
+      "label": "Heating Wall Emitters ≤3500W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Wall emitter heating circuit ≤3500W: 16A breaker, 1.5mm² (3G1.5).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:HeatingWallEmitters4500W",
+      "label": "Heating Wall Emitters ≤4500W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Wall emitter heating circuit ≤4500W: 20A breaker, 2.5mm² (3G2.5).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:HeatingWallEmitters5750W",
+      "label": "Heating Wall Emitters ≤5750W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Wall emitter heating circuit ≤5750W: 25A breaker, 4mm² (3G4).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:HeatingWallEmitters7250W",
+      "label": "Heating Wall Emitters ≤7250W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Wall emitter heating circuit ≤7250W: 32A breaker, 6mm² (3G6).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:FloorHeating1700W",
+      "label": "Floor Heating ≤1700W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Floor heating circuit ≤1700W: 16A breaker, 1.5mm² (3G1.5).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:FloorHeating3400W",
+      "label": "Floor Heating ≤3400W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Floor heating circuit ≤3400W: 25A breaker, 4mm² (3G4).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:FloorHeating4200W",
+      "label": "Floor Heating ≤4200W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Floor heating circuit ≤4200W: 32A breaker, 6mm² (3G6).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:FloorHeating7500W",
+      "label": "Floor Heating ≤7500W",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Floor heating circuit ≤7500W: 40A breaker, 10mm² (3G10).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:IRVESocket16A",
+      "label": "IRVE Socket 16A",
+      "type": "class",
+      "view": "electrical",
+      "comment": "EV charging via standard 16A socket: 16A breaker, 2.5mm² (3G2.5).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:IRVE32AMono",
+      "label": "IRVE 32A Mono",
+      "type": "class",
+      "view": "electrical",
+      "comment": "EV charging wallbox single-phase 32A: 40A breaker, 10mm² (3G10).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
+      "id": "dhc-nfc15100:IRVE32ATri",
+      "label": "IRVE 32A Tri",
+      "type": "class",
+      "view": "electrical",
+      "comment": "EV charging wallbox three-phase 32A: 40A breaker, 10mm² (5G10).",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
     }
   ],
   "links": [
@@ -940,6 +1261,12 @@
       "type": "domain"
     },
     {
+      "source": "dhc:ElectricalTechnicalSpace",
+      "target": "dhc:Space",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
       "source": "dhc:DistributionBoard",
       "target": "dhc:Circuit",
       "label": "has circuit",
@@ -984,6 +1311,42 @@
     {
       "source": "dhc:maxPoints",
       "target": "dhc:Circuit",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:energyProviderName",
+      "target": "dhc:EnergyDelivery",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:currentType",
+      "target": "dhc:EnergyDelivery",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:neutralSystem",
+      "target": "dhc:EnergyDelivery",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:contractedPowerKVA",
+      "target": "dhc:EnergyDelivery",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:phase",
+      "target": "dhc:Circuit",
+      "label": "domain",
+      "type": "domain"
+    },
+    {
+      "source": "dhc:distributionBoardType",
+      "target": "dhc:DistributionBoard",
       "label": "domain",
       "type": "domain"
     },
@@ -1280,6 +1643,138 @@
       "target": "dhc:RealEstate",
       "label": "domain",
       "type": "domain"
+    },
+    {
+      "source": "dhc-nfc14100:NF14EnergyMeter",
+      "target": "dhc:EnergyMeter",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc14100:NF14EmergencyDisconnect",
+      "target": "dhc:EmergencyDisconnect",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:GTL",
+      "target": "dhc:ElectricalTechnicalSpace",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:LightingCircuit",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:SocketCircuit16A_8Sockets",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:SocketCircuit20A_12Sockets",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:KitchenSocketCircuit20A_6Sockets_Dedicated",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:SpecializedApplianceCircuit20A_Dedicated",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:WaterHeaterCircuit20A_Dedicated",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:CookingCircuitMono32A_Dedicated",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:CookingCircuitTri20A_Dedicated",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:HeatingWallEmitters3500W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:HeatingWallEmitters4500W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:HeatingWallEmitters5750W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:HeatingWallEmitters7250W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:FloorHeating1700W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:FloorHeating3400W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:FloorHeating4200W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:FloorHeating7500W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:IRVESocket16A",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:IRVE32AMono",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:IRVE32ATri",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
     }
   ]
 }

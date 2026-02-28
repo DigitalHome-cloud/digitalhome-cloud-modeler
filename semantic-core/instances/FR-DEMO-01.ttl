@@ -1,6 +1,8 @@
-@prefix dhc:  <https://digitalhome.cloud/ontology#> .
-@prefix home: <https://digitalhome.cloud/instances/FR-DEMO-01#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dhc:          <https://digitalhome.cloud/ontology#> .
+@prefix dhc-nfc14100: <https://digitalhome.cloud/ontology/nfc14100#> .
+@prefix dhc-nfc15100: <https://digitalhome.cloud/ontology/nfc15100#> .
+@prefix home:         <https://digitalhome.cloud/instances/FR-DEMO-01#> .
+@prefix xsd:          <http://www.w3.org/2001/XMLSchema#> .
 
 # ============================================================
 # FR-DEMO-01 — Demo French maison (ABox)
@@ -90,11 +92,38 @@ home:SalleDeBains
   dhc:hasFixture home:SDB_WC ;
   dhc:hasFixture home:SDB_Lavabo .
 
+# ── Electrical: Delivery Chain (NFC 14-100) ──
+
+home:LivraisonEnergie
+  a dhc:EnergyDelivery ;
+  dhc:name "Livraison Enedis" ;
+  dhc:energyProviderName "Enedis" ;
+  dhc:currentType "SinglePhase" ;
+  dhc:neutralSystem "TT" ;
+  dhc:contractedPowerKVA 6.0 ;
+  dhc:feeds home:Compteur .
+
+home:Compteur
+  a dhc-nfc14100:NF14EnergyMeter ;
+  dhc:name "Compteur Linky" ;
+  dhc:feeds home:AGCP .
+
+home:AGCP
+  a dhc-nfc14100:NF14EmergencyDisconnect ;
+  dhc:name "Disjoncteur de branchement 30/60A" ;
+  dhc:feeds home:TableauPrincipal .
+
+home:GTL
+  a dhc-nfc15100:GTL ;
+  dhc:name "GTL (Gaine Technique Logement)" ;
+  dhc:locatedIn home:Couloir .
+
 # ── Electrical: Distribution & Circuits ──
 
 home:TableauPrincipal
   a dhc:DistributionBoard ;
   dhc:name "Tableau général" ;
+  dhc:distributionBoardType "ACBoard" ;
   dhc:hasCircuit home:CircuitEclairage ;
   dhc:hasCircuit home:CircuitPrises ;
   dhc:hasCircuit home:CircuitCuisine .
@@ -200,7 +229,7 @@ home:BorneRecharge
   dhc:chargingType "wallbox 7kW" .
 
 home:VoitureElectrique
-  a dhc:ElectricCar ;
+  a dhc:ElectricVehicle ;
   dhc:name "Voiture électrique familiale" ;
   dhc:batteryCapacity 52.0 ;
   dhc:vehicleRange 395.0 ;

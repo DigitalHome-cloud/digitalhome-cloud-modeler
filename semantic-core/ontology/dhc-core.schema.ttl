@@ -6,7 +6,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
 # ============================================================
-# DigitalHome.Cloud Core Ontology — v1.0.0
+# DigitalHome.Cloud Core Ontology — v1.1.0
 #
 # This ontology defines the vocabulary for digital twins of
 # real estate properties. It covers spatial structure, building
@@ -34,7 +34,7 @@
   a owl:Ontology ;
   rdfs:label "DigitalHome.Cloud Core Ontology"@en ;
   dcterms:description "Semantic foundation for digital twins of real estate properties."@en ;
-  owl:versionInfo "1.0.0" ;
+  owl:versionInfo "1.1.0" ;
   dcterms:creator "D-LAB-5 / DigitalHome.Cloud" ;
   dcterms:license <https://opensource.org/licenses/MIT> .
 
@@ -251,6 +251,47 @@ dhc:WiringSegment
   rdfs:comment "A run of cable between two points."@en ;
   dhc:designView "electrical" .
 
+dhc:ElectricalTechnicalSpace
+  a owl:Class ;
+  rdfs:subClassOf dhc:Space ;
+  rdfs:label "Electrical Technical Space"@en ;
+  rdfs:label "Elektro-Technikraum"@de ;
+  rdfs:label "Espace technique électrique"@fr ;
+  rdfs:comment "A generic technical space for electrical installation (e.g. GTL, electrical closet)."@en ;
+  dhc:designView "electrical" .
+
+dhc:EnergyDelivery
+  a owl:Class ;
+  rdfs:label "Energy Delivery"@en ;
+  rdfs:label "Energieeinspeisung"@de ;
+  rdfs:label "Livraison d'énergie"@fr ;
+  rdfs:comment "Root entry point: contractual and physical energy supply to the property."@en ;
+  dhc:designView "electrical" .
+
+dhc:EnergyMeter
+  a owl:Class ;
+  rdfs:label "Energy Meter"@en ;
+  rdfs:label "Stromzähler"@de ;
+  rdfs:label "Compteur d'énergie"@fr ;
+  rdfs:comment "A metering device measuring energy consumption."@en ;
+  dhc:designView "electrical" .
+
+dhc:EmergencyDisconnect
+  a owl:Class ;
+  rdfs:label "Emergency Disconnect"@en ;
+  rdfs:label "Notabschaltung"@de ;
+  rdfs:label "Coupure d'urgence"@fr ;
+  rdfs:comment "Emergency or general disconnect device."@en ;
+  dhc:designView "electrical" .
+
+dhc:Distribution
+  a owl:Class ;
+  rdfs:label "Distribution"@en ;
+  rdfs:label "Verteilung"@de ;
+  rdfs:label "Distribution"@fr ;
+  rdfs:comment "An intermediate distribution node (junction box, sub-distribution)."@en ;
+  dhc:designView "electrical" .
+
 # ── Electrical object properties ──
 
 dhc:hasCircuit
@@ -288,6 +329,23 @@ dhc:hasWiring
   rdfs:range dhc:WiringSegment ;
   dhc:designView "electrical" .
 
+dhc:feeds
+  a owl:ObjectProperty ;
+  rdfs:label "feeds"@en ;
+  rdfs:label "speist"@de ;
+  rdfs:label "alimente"@fr ;
+  rdfs:comment "Generic upstream-to-downstream topology link in the electrical delivery chain."@en ;
+  dhc:designView "electrical" .
+
+dhc:locatedIn
+  a owl:ObjectProperty ;
+  rdfs:label "located in"@en ;
+  rdfs:label "befindet sich in"@de ;
+  rdfs:label "situé dans"@fr ;
+  rdfs:range dhc:Space ;
+  rdfs:comment "Physical location of a device or component within a space."@en ;
+  dhc:designView "electrical" .
+
 # ── Electrical data properties ──
 
 dhc:ratedCurrent
@@ -310,6 +368,71 @@ dhc:maxPoints
   rdfs:domain dhc:Circuit ;
   rdfs:range xsd:integer ;
   rdfs:comment "Maximum number of endpoints (governed by national standards)."@en ;
+  dhc:designView "electrical" .
+
+dhc:energyProviderName
+  a owl:DatatypeProperty ;
+  rdfs:label "energy provider name"@en ;
+  rdfs:label "Energieversorger"@de ;
+  rdfs:label "fournisseur d'énergie"@fr ;
+  rdfs:domain dhc:EnergyDelivery ;
+  rdfs:range xsd:string ;
+  dhc:designView "electrical" .
+
+dhc:currentType
+  a owl:DatatypeProperty ;
+  rdfs:label "current type"@en ;
+  rdfs:label "Stromart"@de ;
+  rdfs:label "type de courant"@fr ;
+  rdfs:domain dhc:EnergyDelivery ;
+  rdfs:range xsd:string ;
+  rdfs:comment "SinglePhase or ThreePhase."@en ;
+  dhc:designView "electrical" .
+
+dhc:neutralSystem
+  a owl:DatatypeProperty ;
+  rdfs:label "neutral system"@en ;
+  rdfs:label "Erdungssystem"@de ;
+  rdfs:label "régime de neutre"@fr ;
+  rdfs:domain dhc:EnergyDelivery ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Star (TT, TN-S, TN-C, IT)."@en ;
+  dhc:designView "electrical" .
+
+dhc:contractedPowerKVA
+  a owl:DatatypeProperty ;
+  rdfs:label "contracted power (kVA)"@en ;
+  rdfs:label "Vertragsleistung (kVA)"@de ;
+  rdfs:label "puissance souscrite (kVA)"@fr ;
+  rdfs:domain dhc:EnergyDelivery ;
+  rdfs:range xsd:decimal ;
+  dhc:designView "electrical" .
+
+dhc:phase
+  a owl:DatatypeProperty ;
+  rdfs:label "phase"@en ;
+  rdfs:domain dhc:Circuit ;
+  rdfs:range xsd:integer ;
+  rdfs:comment "Phase assignment: 1, 2, or 3."@en ;
+  dhc:designView "electrical" .
+
+dhc:distributionBoardType
+  a owl:DatatypeProperty ;
+  rdfs:label "distribution board type"@en ;
+  rdfs:label "Verteilertyp"@de ;
+  rdfs:label "type de tableau"@fr ;
+  rdfs:domain dhc:DistributionBoard ;
+  rdfs:range xsd:string ;
+  rdfs:comment "ACBoard, DCBoard, or CommunicationBoard."@en ;
+  dhc:designView "electrical" .
+
+dhc:wiring
+  a owl:DatatypeProperty ;
+  rdfs:label "wiring"@en ;
+  rdfs:label "Verdrahtung"@de ;
+  rdfs:label "câblage"@fr ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Cable specification, e.g. 3G2.5, 5G6."@en ;
   dhc:designView "electrical" .
 
 

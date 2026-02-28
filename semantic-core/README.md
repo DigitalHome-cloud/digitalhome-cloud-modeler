@@ -88,11 +88,26 @@ The Semantic Core is **natively aligned** with [Brick Schema](https://brickschem
 
 ```
 ontology/         # Core schemas and alignments
+modules/          # Norm modules (country-specific extensions)
+  module-manifest.json          # Module discovery config
+  dhc-nfc14100-electrical.ttl   # NF C 14-100 energy delivery (FR)
+  dhc-nfc15100-electrical.ttl   # NF C 15-100 installation (FR)
 shapes/           # Compliance & best-practice rule packs
 instances/        # Example or tenant-specific graphs
 scripts/          # Validation & build tools
 .github/workflows # CI for validation and publishing
 ```
+
+### Modular Architecture (Core + Norm Modules)
+
+The ontology follows a **Core + Norm Module** pattern (see ADR 0012):
+
+- **Core** (`dhc-core.schema.ttl`) defines universal, regulation-agnostic classes
+- **Modules** (`modules/*.ttl`) subclass Core classes with country-specific detail
+- Modules only **specialize** — they never redefine Core semantics
+- Each module covers one domain (e.g. electrical delivery, electrical installation)
+- Module manifest (`module-manifest.json`) enables tooling to discover and compose modules
+- Build pipeline merges Core + modules into unified artifacts
 
 ---
 

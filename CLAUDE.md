@@ -76,8 +76,13 @@ semantic-core/
   ontology/
     dhc-core.schema.ttl    ← core ontology (classes, properties, design views)
     context.jsonld          ← JSON-LD context for runtime use
+  modules/
+    module-manifest.json   ← module discovery config (id, file, category, countries)
+    dhc-nfc14100-electrical.ttl  ← NF C 14-100 energy delivery module (FR)
+    dhc-nfc15100-electrical.ttl  ← NF C 15-100 installation module (FR)
   instances/
     DE-DEMO.ttl             ← demo instance data
+    FR-DEMO-01.ttl          ← French demo with NFC 14-100 delivery chain
   shapes/                   ← SHACL validation shapes
 ```
 
@@ -85,8 +90,9 @@ semantic-core/
 
 **Flow:**
 1. **Author** — TTL files are edited and versioned in this repo under `semantic-core/` (semantic versioning: `model-vX.Y.Z`)
-2. **Build-time parse** — `scripts/parse-ontology.js` reads the TTL and generates `src/data/ontology-graph.json` (includes `meta.version` and `meta.label`)
-3. **Publish** — `scripts/publish-ontology.js` uploads artifacts to S3 at `public/ontology/v{VERSION}/` and `public/ontology/latest/`
+2. **Build-time parse** — `scripts/parse-ontology.js` reads the Core TTL + module TTLs (via `module-manifest.json`) and generates `src/data/ontology-graph.json` (includes `meta.version`, `meta.label`, `meta.modules`)
+3. **Generate toolbox** — `scripts/generate-blockly-toolbox.js` reads Core + modules, generates Blockly block definitions with subclass property inheritance and module defaults
+4. **Publish** — `scripts/publish-ontology.js` uploads artifacts + module files to S3 at `public/ontology/v{VERSION}/` and `public/ontology/latest/`
 4. **Deploy** — Amplify Hosting deploys the modeler with the freshly parsed graph data baked in
 
 ### Design Views

@@ -26,6 +26,8 @@ const CONTEXT_PATH = path.resolve(
 );
 const BLOCKLY_BLOCKS_PATH = path.resolve(__dirname, "../src/data/blockly-blocks.json");
 const BLOCKLY_TOOLBOX_PATH = path.resolve(__dirname, "../src/data/blockly-toolbox.json");
+const MODULES_DIR = path.resolve(__dirname, "../semantic-core/modules");
+const MANIFEST_PATH = path.resolve(MODULES_DIR, "module-manifest.json");
 
 // Read ontology graph and extract version
 const graphJson = fs.readFileSync(GRAPH_PATH, "utf-8");
@@ -118,6 +120,40 @@ async function main() {
       blocklyToolboxJson,
       "application/json"
     );
+  }
+
+  // Module files
+  if (fs.existsSync(MANIFEST_PATH)) {
+    console.log("\nPublishing module files...");
+    const manifestJson = fs.readFileSync(MANIFEST_PATH, "utf-8");
+    await upload(
+      `public/ontology/v${version}/modules/module-manifest.json`,
+      manifestJson,
+      "application/json"
+    );
+    await upload(
+      "public/ontology/latest/modules/module-manifest.json",
+      manifestJson,
+      "application/json"
+    );
+
+    const manifest = JSON.parse(manifestJson);
+    for (const mod of manifest.modules) {
+      const modTtlPath = path.resolve(MODULES_DIR, mod.file);
+      if (fs.existsSync(modTtlPath)) {
+        const modTtl = fs.readFileSync(modTtlPath, "utf-8");
+        await upload(
+          `public/ontology/v${version}/modules/${mod.file}`,
+          modTtl,
+          "text/turtle"
+        );
+        await upload(
+          `public/ontology/latest/modules/${mod.file}`,
+          modTtl,
+          "text/turtle"
+        );
+      }
+    }
   }
 
   console.log(`\nDone. Ontology v${version} published.`);
