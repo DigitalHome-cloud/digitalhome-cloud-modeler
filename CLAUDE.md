@@ -92,8 +92,8 @@ semantic-core/
 1. **Author** — TTL files are edited and versioned in this repo under `semantic-core/` (semantic versioning: `model-vX.Y.Z`)
 2. **Build-time parse** — `scripts/parse-ontology.js` reads the Core TTL + module TTLs (via `module-manifest.json`) and generates `src/data/ontology-graph.json` (includes `meta.version`, `meta.label`, `meta.modules`)
 3. **Generate toolbox** — `scripts/generate-blockly-toolbox.js` reads Core + modules, generates Blockly block definitions with subclass property inheritance and module defaults
-4. **Publish** — `scripts/publish-ontology.js` uploads artifacts + module files to S3 at `public/ontology/v{VERSION}/` and `public/ontology/latest/`
-4. **Deploy** — Amplify Hosting deploys the modeler with the freshly parsed graph data baked in
+4. **Publish** — Admins publish artifacts to S3 via the in-app Publish page (`/publish/`), which uses Amplify Storage with Cognito credentials. The build-time script `scripts/publish-ontology.js` exists for manual/local use but is **not** run in CI/CD.
+5. **Deploy** — Amplify Hosting deploys the modeler with the freshly parsed graph data baked in
 
 ### Design Views
 
@@ -104,7 +104,7 @@ Nodes are color-coded by `dhc:designView` annotation:
 
 ### Navigation
 
-Header links: Modeler (home), Library, Portal (cross-app).
+Header links: Modeler (home), Library, Publish, Portal (cross-app).
 - `GATSBY_PORTAL_URL` → defaults to `https://portal.digitalhome.cloud`
 - User pill shows DEMO badge or authenticated user name
 - Language switcher: EN / DE / FR
@@ -171,4 +171,4 @@ Amplify Hosting with branch-to-environment mapping:
 - `main` → production (`modeler.digitalhome.cloud`)
 - `stage` → staging
 
-Build spec is in `amplify.yml`. The build runs `npm run parse-ontology && npm run build` and deploys `public/`.
+Build spec is in `amplify.yml`. The build runs `parse-ontology`, `generate-blockly-toolbox`, then `gatsby build` and deploys `public/`. Ontology publishing to S3 is done via the in-app Publish page, not during CI/CD.

@@ -9,7 +9,6 @@ frontend:
       commands:
         - npm run parse-ontology
         - npm run generate-blockly-toolbox
-        - npm run publish-ontology
         - npm run build
   artifacts:
     baseDirectory: public
