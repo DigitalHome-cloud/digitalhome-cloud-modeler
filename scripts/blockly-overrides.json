@@ -40,6 +40,9 @@
     "floorLevel": 0,
     "contractedPowerKVA": 6.0
   },
+  "labelOverrides": {
+    "dhc-nfc15100:GTL": "GTL (Gaine Technique Logement)"
+  },
   "moduleDefaults": {
     "dhc-nfc15100:LightingCircuit": {
       "CROSS_SECTION": 1.5,
@@ -130,6 +133,12 @@
       "RATED_CURRENT": "32",
       "MAX_POINTS": 1,
       "WIRING": "3G6"
+    },
+    "dhc-nfc15100:FloorHeating5400W40ADedicated": {
+      "CROSS_SECTION": 6,
+      "RATED_CURRENT": "40",
+      "MAX_POINTS": 1,
+      "WIRING": "4G6"
     },
     "dhc-nfc15100:FloorHeating7500W": {
       "CROSS_SECTION": 10,

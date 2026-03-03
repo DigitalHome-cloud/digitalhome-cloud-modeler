@@ -2,9 +2,7 @@ import * as React from "react";
 import { Link } from "gatsby";
 import { useTranslation, useI18next } from "gatsby-plugin-react-i18next";
 import { useAuth } from "../context/AuthContext";
-
-const portalUrl =
-  process.env.GATSBY_PORTAL_URL || "https://portal.digitalhome.cloud";
+import { getAppUrl } from "../utils/getAppUrl";
 
 const Header = () => {
   const { t } = useTranslation();
@@ -34,7 +32,10 @@ const Header = () => {
             <Link to="/library/" className="dhc-nav-link">
               {t("nav.library")}
             </Link>
-            <a href={portalUrl} className="dhc-nav-link">
+            <Link to="/publish/" className="dhc-nav-link">
+              {t("nav.publish")}
+            </Link>
+            <a href={getAppUrl("portal")} className="dhc-nav-link">
               {t("nav.portal")}
             </a>
           </div>

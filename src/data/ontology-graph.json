@@ -1133,6 +1133,15 @@
       "module": "dhc-nfc15100-electrical"
     },
     {
+      "id": "dhc-nfc15100:FloorHeating5400W40ADedicated",
+      "label": "Floor Heating ≤5400W (40A, dedicated)",
+      "type": "class",
+      "view": "electrical",
+      "comment": "Floor heating circuit ≤5400W: 40A breaker, 6mm² (4G6), dedicated.",
+      "superClass": "dhc:Circuit",
+      "module": "dhc-nfc15100-electrical"
+    },
+    {
       "id": "dhc-nfc15100:FloorHeating7500W",
       "label": "Floor Heating ≤7500W",
       "type": "class",
@@ -1748,6 +1757,12 @@
     },
     {
       "source": "dhc-nfc15100:FloorHeating4200W",
+      "target": "dhc:Circuit",
+      "label": "subClassOf",
+      "type": "subClassOf"
+    },
+    {
+      "source": "dhc-nfc15100:FloorHeating5400W40ADedicated",
       "target": "dhc:Circuit",
       "label": "subClassOf",
       "type": "subClassOf"

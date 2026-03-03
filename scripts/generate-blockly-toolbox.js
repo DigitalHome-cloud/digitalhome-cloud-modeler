@@ -90,6 +90,32 @@ const VIEW_LABELS = {
   automation: "Automation",
 };
 
+/**
+ * Humanize a PascalCase local name by stripping known module prefixes
+ * and inserting spaces with number+unit awareness.
+ * e.g. "Nfc15100SocketCircuit16A_8Sockets" → "Socket Circuit 16A — 8 Sockets"
+ *      "FloorHeating5400W40ADedicated" → "Floor Heating 5400W 40A Dedicated"
+ */
+function humanizeLocalName(localName) {
+  // Strip known module prefixes
+  let name = localName
+    .replace(/^Nfc15100/, "")
+    .replace(/^Nfc14100/, "")
+    .replace(/^Nf14/, "");
+
+  // Replace underscores with " — " separator
+  name = name.replace(/_/g, " — ");
+
+  // Insert spaces: between lowercase/digit and uppercase
+  name = name.replace(/([a-z])([A-Z])/g, "$1 $2");
+  // Between digit and uppercase letter (but not units like W, A)
+  name = name.replace(/(\d)([A-Z][a-z])/g, "$1 $2");
+  // Between uppercase acronym run and next capitalized word
+  name = name.replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+
+  return name.trim();
+}
+
 // ── TTL Parsing helpers ──
 
 function extractField(block, predicate) {
@@ -169,7 +195,7 @@ function parseTTL(ttlContent, prefixFilter) {
     const { id, owlType } = parsed;
     if (id === "dhc:designView") continue;
 
-    const label = extractField(trimmed, "rdfs:label") || id.split(":").pop();
+    const label = extractField(trimmed, "rdfs:label") || humanizeLocalName(id.split(":").pop());
     const comment = extractField(trimmed, "rdfs:comment");
     const view = extractDesignView(trimmed);
     const superClass = extractObject(trimmed, "rdfs:subClassOf");
@@ -363,6 +389,11 @@ for (const [classId, cls] of classMap) {
   const effectiveView = getEffectiveView(cls) || "shared";
   const colour = VIEW_COLOURS[effectiveView] || VIEW_COLOURS.shared;
 
+  // Apply label overrides from blockly-overrides.json
+  const classLabel = (overrides.labelOverrides && overrides.labelOverrides[classId])
+    ? overrides.labelOverrides[classId]
+    : cls.label;
+
   // Collect datatype properties for this class (direct + inherited from superclass chain)
   const directDataProps = datatypeProps.filter((p) => p.domain === classId);
   const inheritedDataProps = [];
@@ -393,7 +424,7 @@ for (const [classId, cls] of classMap) {
     message0: "",
     args0: [],
     inputsInline: false,
-    tooltip: cls.comment || cls.label,
+    tooltip: cls.comment || classLabel,
   };
 
   const messageParts = [];
@@ -401,11 +432,11 @@ for (const [classId, cls] of classMap) {
   let argIndex = 0;
 
   // LABEL field (always first)
-  messageParts.push(`${cls.label} %${argIndex + 1}`);
+  messageParts.push(`${classLabel} %${argIndex + 1}`);
   args.push({
     type: "field_input",
     name: "LABEL",
-    text: cls.label,
+    text: classLabel,
   });
   argIndex++;
 
