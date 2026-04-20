@@ -1,4 +1,6 @@
 import * as React from "react";
+import { useTranslation } from "gatsby-plugin-react-i18next";
+import { pickLabel } from "../utils/i18nLabel";
 
 const VIEW_COLORS = {
   spatial: "#22c55e",
@@ -35,7 +37,6 @@ const VIEW_ORDER = [
 
 const OntologySidebar = ({
   graphData,
-  meta,
   visibleViews,
   onToggleView,
   onShowAll,
@@ -45,21 +46,34 @@ const OntologySidebar = ({
   onNodeSelect,
   selectedNode,
 }) => {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || "en";
   const [expanded, setExpanded] = React.useState({});
 
-  // Group nodes by view
+  // Group class nodes by designView; enum instances are nested under their class.
   const grouped = React.useMemo(() => {
     if (!graphData) return {};
     const groups = {};
+    const enumsByClass = {};
+
     for (const node of graphData.nodes) {
-      const view = node.view || "shared";
-      if (!groups[view]) groups[view] = { classes: [], properties: [] };
-      if (node.type === "class") {
-        groups[view].classes.push(node);
-      } else {
-        groups[view].properties.push(node);
+      if (node.type === "enumInstance") {
+        const ofClass = node.ofClass;
+        if (!enumsByClass[ofClass]) enumsByClass[ofClass] = [];
+        enumsByClass[ofClass].push(node);
       }
     }
+
+    for (const node of graphData.nodes) {
+      if (node.type !== "class") continue;
+      const view = node.designView || "shared";
+      if (!groups[view]) groups[view] = { classes: [] };
+      groups[view].classes.push({
+        ...node,
+        enumInstances: enumsByClass[node.id] || [],
+      });
+    }
+
     return groups;
   }, [graphData]);
 
@@ -81,26 +95,18 @@ const OntologySidebar = ({
 
   return (
     <div className="dhc-sidebar">
-      {meta?.version && (
+      {graphData?.version && (
         <div className="dhc-sidebar-version">
-          Ontology v{meta.version}
+          Ontology v{graphData.version}
         </div>
       )}
       <div className="dhc-sidebar-header">
         <span className="dhc-sidebar-title">Design Views</span>
         <div className="dhc-sidebar-header-actions">
-          <button
-            className="dhc-sidebar-clear"
-            onClick={onShowAll}
-            title="Show all views"
-          >
+          <button className="dhc-sidebar-clear" onClick={onShowAll} title="Show all views">
             All
           </button>
-          <button
-            className="dhc-sidebar-clear"
-            onClick={onHideAll}
-            title="Hide all views"
-          >
+          <button className="dhc-sidebar-clear" onClick={onHideAll} title="Hide all views">
             None
           </button>
         </div>
@@ -112,57 +118,51 @@ const OntologySidebar = ({
             checked={showProperties}
             onChange={onToggleProperties}
           />
-          <span>Show Properties</span>
+          <span>Show Property Edges</span>
         </label>
         <div className="dhc-sidebar-controls-row">
-          <button
-            className="dhc-sidebar-clear"
-            onClick={expandAll}
-            title="Expand all sections"
-          >
+          <button className="dhc-sidebar-clear" onClick={expandAll} title="Expand all sections">
             Expand
           </button>
-          <button
-            className="dhc-sidebar-clear"
-            onClick={collapseAll}
-            title="Collapse all sections"
-          >
+          <button className="dhc-sidebar-clear" onClick={collapseAll} title="Collapse all sections">
             Collapse
           </button>
         </div>
       </div>
       <div className="dhc-sidebar-body">
-        {VIEW_ORDER.map((view) => {
+        {[...VIEW_ORDER, "shared"].map((view) => {
           const group = grouped[view];
-          if (!group) return null;
+          if (!group || group.classes.length === 0) return null;
           const isExpanded = expanded[view] !== false; // default open
-          const isVisible = visibleViews.has(view);
+          const isVisible = view === "shared" ? true : visibleViews.has(view);
 
           return (
             <div key={view} className="dhc-sidebar-section">
               <div
                 className={`dhc-sidebar-section-header ${isVisible ? "dhc-sidebar-section-header--active" : ""}`}
               >
-                <input
-                  type="checkbox"
-                  className="dhc-sidebar-checkbox"
-                  checked={isVisible}
-                  onChange={() => onToggleView(view)}
-                  title={`Toggle ${VIEW_LABELS[view]}`}
-                />
+                {view !== "shared" && (
+                  <input
+                    type="checkbox"
+                    className="dhc-sidebar-checkbox"
+                    checked={isVisible}
+                    onChange={() => onToggleView(view)}
+                    title={`Toggle ${VIEW_LABELS[view]}`}
+                  />
+                )}
                 <button
                   className="dhc-sidebar-section-btn"
                   onClick={() => toggleExpanded(view)}
                 >
                   <span
                     className="dhc-view-dot"
-                    style={{ background: VIEW_COLORS[view] }}
+                    style={{ background: VIEW_COLORS[view] || "#e5e7eb" }}
                   />
                   <span className="dhc-sidebar-section-label">
-                    {VIEW_LABELS[view]}
+                    {VIEW_LABELS[view] || "Shared"}
                   </span>
                   <span className="dhc-sidebar-section-count">
-                    {group.classes.length + group.properties.length}
+                    {group.classes.length}
                   </span>
                   <span className={`dhc-sidebar-chevron ${isExpanded ? "dhc-sidebar-chevron--open" : ""}`}>
                     &#9654;
@@ -171,94 +171,37 @@ const OntologySidebar = ({
               </div>
               {isExpanded && (
                 <div className="dhc-sidebar-items">
-                  {group.classes.length > 0 && (
-                    <>
-                      <div className="dhc-sidebar-group-label">Classes</div>
-                      {group.classes.map((node) => (
-                        <button
-                          key={node.id}
-                          className={`dhc-sidebar-item ${selectedNode === node.id ? "dhc-sidebar-item--selected" : ""}`}
-                          onClick={() => onNodeSelect(node.id)}
-                        >
-                          <span className="dhc-sidebar-item-icon">C</span>
-                          {node.label}
-                        </button>
-                      ))}
-                    </>
-                  )}
-                  {group.properties.length > 0 && (
-                    <>
-                      <div className="dhc-sidebar-group-label">Properties</div>
-                      {group.properties.map((node) => (
-                        <button
-                          key={node.id}
-                          className={`dhc-sidebar-item dhc-sidebar-item--prop ${selectedNode === node.id ? "dhc-sidebar-item--selected" : ""}`}
-                          onClick={() => onNodeSelect(node.id)}
-                        >
-                          <span className="dhc-sidebar-item-icon">
-                            {node.type === "objectProperty" ? "O" : "D"}
+                  {group.classes.map((node) => (
+                    <React.Fragment key={node.id}>
+                      <button
+                        className={`dhc-sidebar-item ${selectedNode === node.id ? "dhc-sidebar-item--selected" : ""}`}
+                        onClick={() => onNodeSelect(node.id)}
+                      >
+                        <span className="dhc-sidebar-item-icon">C</span>
+                        {pickLabel(node.label, lang) || node.id}
+                        {node.governedByNorms?.length > 0 && (
+                          <span className="dhc-sidebar-item-badge" title={node.governedByNorms.join(", ")}>
+                            {node.governedByNorms.length}
                           </span>
-                          {node.label}
+                        )}
+                      </button>
+                      {node.enumInstances.map((inst) => (
+                        <button
+                          key={inst.id}
+                          className={`dhc-sidebar-item dhc-sidebar-item--enum ${selectedNode === inst.id ? "dhc-sidebar-item--selected" : ""}`}
+                          onClick={() => onNodeSelect(inst.id)}
+                        >
+                          <span className="dhc-sidebar-item-icon">E</span>
+                          {pickLabel(inst.label, lang) || inst.id}
                         </button>
                       ))}
-                    </>
-                  )}
+                    </React.Fragment>
+                  ))}
                 </div>
               )}
             </div>
           );
         })}
-
-        {/* Shared (no view) */}
-        {grouped["shared"] && (
-          <div className="dhc-sidebar-section">
-            <div className="dhc-sidebar-section-header">
-              <button
-                className="dhc-sidebar-section-btn"
-                onClick={() => toggleExpanded("shared")}
-              >
-                <span
-                  className="dhc-view-dot"
-                  style={{ background: "#e5e7eb" }}
-                />
-                <span className="dhc-sidebar-section-label">Shared</span>
-                <span className="dhc-sidebar-section-count">
-                  {(grouped["shared"].classes?.length || 0) +
-                    (grouped["shared"].properties?.length || 0)}
-                </span>
-                <span className={`dhc-sidebar-chevron ${expanded["shared"] !== false ? "dhc-sidebar-chevron--open" : ""}`}>
-                  &#9654;
-                </span>
-              </button>
-            </div>
-            {expanded["shared"] !== false && (
-              <div className="dhc-sidebar-items">
-                {grouped["shared"].classes.map((node) => (
-                  <button
-                    key={node.id}
-                    className={`dhc-sidebar-item ${selectedNode === node.id ? "dhc-sidebar-item--selected" : ""}`}
-                    onClick={() => onNodeSelect(node.id)}
-                  >
-                    <span className="dhc-sidebar-item-icon">C</span>
-                    {node.label}
-                  </button>
-                ))}
-                {grouped["shared"].properties.map((node) => (
-                  <button
-                    key={node.id}
-                    className={`dhc-sidebar-item dhc-sidebar-item--prop ${selectedNode === node.id ? "dhc-sidebar-item--selected" : ""}`}
-                    onClick={() => onNodeSelect(node.id)}
-                  >
-                    <span className="dhc-sidebar-item-icon">
-                      {node.type === "objectProperty" ? "O" : "D"}
-                    </span>
-                    {node.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

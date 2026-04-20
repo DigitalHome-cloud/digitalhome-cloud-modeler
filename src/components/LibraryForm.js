@@ -2,11 +2,11 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { generateClient } from "aws-amplify/api";
 import { createLibraryItem, updateLibraryItem } from "../graphql/mutations";
-import graphData from "../data/ontology-graph.json";
+import { useOntology } from "../context/OntologyContext";
+import { pickLabel } from "../utils/i18nLabel";
 
 const client = typeof window !== "undefined" ? generateClient() : null;
 
-// Group ontology classes by design view for the multi-select
 const VIEW_ORDER = [
   "spatial", "building", "electrical", "plumbing",
   "heating", "network", "governance", "automation",
@@ -23,21 +23,26 @@ const VIEW_LABELS = {
   automation: "Automation",
 };
 
-function getClassesByView() {
+function groupClassesByView(graph) {
   const groups = {};
-  for (const node of graphData.nodes) {
+  if (!graph) return groups;
+  for (const node of graph.nodes) {
     if (node.type !== "class") continue;
-    const view = node.view || "shared";
+    const view = node.designView || "shared";
     if (!groups[view]) groups[view] = [];
     groups[view].push(node);
   }
   return groups;
 }
 
-const classesByView = getClassesByView();
-
 const LibraryForm = ({ item, onClose, onSaved }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { ontologyGraph } = useOntology();
+  const lang = i18n.language || "en";
+  const classesByView = React.useMemo(
+    () => groupClassesByView(ontologyGraph),
+    [ontologyGraph]
+  );
   const isEdit = item && item.id;
 
   const [title, setTitle] = React.useState(item?.title || "");
@@ -219,7 +224,7 @@ const LibraryForm = ({ item, onClose, onSaved }) => {
                         checked={selectedClasses.has(node.id)}
                         onChange={() => toggleClass(node.id)}
                       />
-                      <span>{node.label}</span>
+                      <span>{pickLabel(node.label, lang) || node.id}</span>
                     </label>
                   ))}
                 </div>
@@ -235,9 +240,14 @@ const LibraryForm = ({ item, onClose, onSaved }) => {
                       checked={selectedClasses.has(node.id)}
                       onChange={() => toggleClass(node.id)}
                     />
-                    <span>{node.label}</span>
+                    <span>{pickLabel(node.label, lang) || node.id}</span>
                   </label>
                 ))}
+              </div>
+            )}
+            {!ontologyGraph && (
+              <div className="dhc-library-form-empty">
+                Fetch the ontology from the Config page to populate class options.
               </div>
             )}
           </div>
