@@ -8,3 +8,15 @@
  * full rebuild even if the source commit SHA is unchanged.
  */
 export const PIPELINE_VERSION = "v2-1";
+
+/**
+ * Pure decision for whether a cached workdir can satisfy a fetch.
+ * Exposed so unit tests can exercise the logic without touching S3.
+ */
+export function isCacheHit({ meta, upstreamSha, pipelineVersion }) {
+  if (!meta) return false;
+  if (!upstreamSha) return false;
+  if (meta.commitSha !== upstreamSha) return false;
+  if (meta.pipelineVersion !== pipelineVersion) return false;
+  return true;
+}

@@ -8,7 +8,7 @@ import {
   fetchWorkdirMeta,
   fetchWorkdirArtifact,
 } from "../utils/s3";
-import { PIPELINE_VERSION } from "../utils/buildPipeline";
+import { PIPELINE_VERSION, isCacheHit } from "../utils/buildPipeline";
 
 const OntologyContext = createContext(null);
 
@@ -60,9 +60,11 @@ export const OntologyProvider = ({ children }) => {
         if (!force) {
           const meta = await fetchWorkdirMeta(br).catch(() => null);
           if (
-            meta &&
-            meta.commitSha === upstreamSha &&
-            meta.pipelineVersion === PIPELINE_VERSION
+            isCacheHit({
+              meta,
+              upstreamSha,
+              pipelineVersion: PIPELINE_VERSION,
+            })
           ) {
             try {
               const [graph, blocks, toolbox, registry] = await Promise.all([
