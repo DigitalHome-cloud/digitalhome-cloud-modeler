@@ -1,4 +1,6 @@
 import * as React from "react";
+import { useTranslation } from "gatsby-plugin-react-i18next";
+import { pickLabel } from "../utils/i18nLabel";
 
 const VIEW_COLORS = {
   spatial: "#22c55e",
@@ -13,31 +15,29 @@ const VIEW_COLORS = {
 
 const TYPE_LABELS = {
   class: "Class",
-  objectProperty: "Object Property",
-  datatypeProperty: "Datatype Property",
+  enumInstance: "Enum Instance",
 };
 
 const OntologyInspector = ({ graphData, selectedNode }) => {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || "en";
+
   const node = React.useMemo(() => {
     if (!selectedNode || !graphData) return null;
     return graphData.nodes.find((n) => n.id === selectedNode);
   }, [selectedNode, graphData]);
 
-  const relatedProperties = React.useMemo(() => {
-    if (!node || node.type !== "class" || !graphData) return [];
-    return graphData.nodes.filter(
-      (n) =>
-        (n.type === "objectProperty" || n.type === "datatypeProperty") &&
-        (n.domain === node.id || n.range === node.id)
+  const incoming = React.useMemo(() => {
+    if (!node || !graphData) return [];
+    return graphData.links.filter(
+      (l) => (l.target?.id || l.target) === node.id
     );
   }, [node, graphData]);
 
-  const relatedLinks = React.useMemo(() => {
+  const outgoing = React.useMemo(() => {
     if (!node || !graphData) return [];
     return graphData.links.filter(
-      (l) =>
-        (l.source?.id || l.source) === node.id ||
-        (l.target?.id || l.target) === node.id
+      (l) => (l.source?.id || l.source) === node.id
     );
   }, [node, graphData]);
 
@@ -57,7 +57,8 @@ const OntologyInspector = ({ graphData, selectedNode }) => {
     );
   }
 
-  const viewColor = VIEW_COLORS[node.view] || "#e5e7eb";
+  const viewColor = VIEW_COLORS[node.designView] || "#e5e7eb";
+  const labelText = pickLabel(node.label, lang) || node.id;
 
   return (
     <div className="dhc-panel dhc-panel--inspector">
@@ -68,7 +69,7 @@ const OntologyInspector = ({ graphData, selectedNode }) => {
       <div className="dhc-panel-body">
         <div className="dhc-inspector-field">
           <div className="dhc-inspector-label">Label</div>
-          <div className="dhc-inspector-value">{node.label}</div>
+          <div className="dhc-inspector-value">{labelText}</div>
         </div>
 
         <div className="dhc-inspector-field">
@@ -85,21 +86,12 @@ const OntologyInspector = ({ graphData, selectedNode }) => {
           </div>
         </div>
 
-        {node.view && (
+        {node.designView && (
           <div className="dhc-inspector-field">
             <div className="dhc-inspector-label">Design View</div>
             <div className="dhc-inspector-value">
               <span className="dhc-view-dot" style={{ background: viewColor }} />
-              {node.view}
-            </div>
-          </div>
-        )}
-
-        {node.comment && (
-          <div className="dhc-inspector-field">
-            <div className="dhc-inspector-label">Description</div>
-            <div className="dhc-inspector-value dhc-inspector-value--comment">
-              {node.comment}
+              {node.designView}
             </div>
           </div>
         )}
@@ -113,54 +105,61 @@ const OntologyInspector = ({ graphData, selectedNode }) => {
           </div>
         )}
 
-        {node.domain && (
+        {node.ofClass && (
           <div className="dhc-inspector-field">
-            <div className="dhc-inspector-label">Domain</div>
+            <div className="dhc-inspector-label">Member of</div>
             <div className="dhc-inspector-value dhc-inspector-value--mono">
-              {node.domain}
+              {node.ofClass}
             </div>
           </div>
         )}
 
-        {node.range && (
+        {node.governedByNorms?.length > 0 && (
           <div className="dhc-inspector-field">
-            <div className="dhc-inspector-label">Range</div>
-            <div className="dhc-inspector-value dhc-inspector-value--mono">
-              {node.range}
-            </div>
-          </div>
-        )}
-
-        {relatedProperties.length > 0 && (
-          <div className="dhc-inspector-field">
-            <div className="dhc-inspector-label">
-              Related Properties ({relatedProperties.length})
-            </div>
+            <div className="dhc-inspector-label">Governed by Norms</div>
             <div className="dhc-inspector-list">
-              {relatedProperties.map((p) => (
-                <div key={p.id} className="dhc-inspector-list-item">
-                  <span className="dhc-inspector-list-icon">
-                    {p.type === "objectProperty" ? "O" : "D"}
-                  </span>
-                  {p.label}
+              {node.governedByNorms.map((norm) => (
+                <div key={norm} className="dhc-inspector-list-item">
+                  <span className="dhc-inspector-list-icon">N</span>
+                  {norm}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {relatedLinks.length > 0 && (
+        {outgoing.length > 0 && (
           <div className="dhc-inspector-field">
             <div className="dhc-inspector-label">
-              Connections ({relatedLinks.length})
+              Outgoing ({outgoing.length})
             </div>
             <div className="dhc-inspector-list">
-              {relatedLinks.map((l, i) => (
-                <div key={i} className="dhc-inspector-list-item">
-                  <span className="dhc-inspector-list-arrow">
-                    {(l.source?.id || l.source) === node.id ? "\u2192" : "\u2190"}
+              {outgoing.map((l, i) => (
+                <div key={`out-${i}`} className="dhc-inspector-list-item">
+                  <span className="dhc-inspector-list-arrow">&rarr;</span>
+                  <span className="dhc-inspector-list-prop">{l.property}</span>
+                  <span className="dhc-inspector-list-target">
+                    {l.target?.id || l.target}
                   </span>
-                  {l.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {incoming.length > 0 && (
+          <div className="dhc-inspector-field">
+            <div className="dhc-inspector-label">
+              Incoming ({incoming.length})
+            </div>
+            <div className="dhc-inspector-list">
+              {incoming.map((l, i) => (
+                <div key={`in-${i}`} className="dhc-inspector-list-item">
+                  <span className="dhc-inspector-list-arrow">&larr;</span>
+                  <span className="dhc-inspector-list-prop">{l.property}</span>
+                  <span className="dhc-inspector-list-target">
+                    {l.source?.id || l.source}
+                  </span>
                 </div>
               ))}
             </div>

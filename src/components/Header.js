@@ -2,9 +2,7 @@ import * as React from "react";
 import { Link } from "gatsby";
 import { useTranslation, useI18next } from "gatsby-plugin-react-i18next";
 import { useAuth } from "../context/AuthContext";
-
-const portalUrl =
-  process.env.GATSBY_PORTAL_URL || "https://portal.digitalhome.cloud";
+import { getAppUrl } from "../utils/getAppUrl";
 
 const Header = () => {
   const { t } = useTranslation();
@@ -28,25 +26,28 @@ const Header = () => {
 
         <nav className="dhc-nav">
           <div className="dhc-nav-group">
+            <Link to="/config/" className="dhc-nav-link">
+              {t("nav.config")}
+            </Link>
             <Link to="/" className="dhc-nav-link">
-              {t("nav.modeler")}
+              {t("nav.model")}
             </Link>
-            <Link to="/library/" className="dhc-nav-link">
-              {t("nav.library")}
+            <Link to="/builder/" className="dhc-nav-link">
+              {t("nav.builder")}
             </Link>
-            <a href={portalUrl} className="dhc-nav-link">
+            <Link to="/publish/" className="dhc-nav-link">
+              {t("nav.publish")}
+            </Link>
+            <a href={getAppUrl("portal")} className="dhc-nav-link">
               {t("nav.portal")}
             </a>
           </div>
 
           <div className="dhc-nav-group dhc-nav-auth">
-            {authState === "demo" && (
-              <>
-                <span className="dhc-nav-pill">DEMO</span>
-                <Link to="/signin/" className="dhc-nav-link">
-                  Sign In
-                </Link>
-              </>
+            {!isAuthenticated && (
+              <Link to="/signin/" className="dhc-nav-link">
+                Sign In
+              </Link>
             )}
 
             {isAuthenticated && (

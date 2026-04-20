@@ -193,6 +193,15 @@ dhc-nfc15100:FloorHeating4200W
   rdfs:comment "Floor heating circuit ≤4200W: 32A breaker, 6mm² (3G6)."@en ;
   dhc:designView "electrical" .
 
+dhc-nfc15100:FloorHeating5400W40ADedicated
+  a owl:Class ;
+  rdfs:subClassOf dhc:Circuit ;
+  rdfs:label "Floor Heating ≤5400W (40A, dedicated)"@en ;
+  rdfs:label "Fußbodenheizung ≤5400W (40A, dediziert)"@de ;
+  rdfs:label "Plancher chauffant ≤5400W (40A, dédié)"@fr ;
+  rdfs:comment "Floor heating circuit ≤5400W: 40A breaker, 6mm² (4G6), dedicated."@en ;
+  dhc:designView "electrical" .
+
 dhc-nfc15100:FloorHeating7500W
   a owl:Class ;
   rdfs:subClassOf dhc:Circuit ;

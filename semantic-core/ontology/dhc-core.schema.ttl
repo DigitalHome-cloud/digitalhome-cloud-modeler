@@ -6,7 +6,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
 # ============================================================
-# DigitalHome.Cloud Core Ontology — v1.1.0
+# DigitalHome.Cloud Core Ontology — v1.2.0
 #
 # This ontology defines the vocabulary for digital twins of
 # real estate properties. It covers spatial structure, building
@@ -34,7 +34,7 @@
   a owl:Ontology ;
   rdfs:label "DigitalHome.Cloud Core Ontology"@en ;
   dcterms:description "Semantic foundation for digital twins of real estate properties."@en ;
-  owl:versionInfo "1.1.0" ;
+  owl:versionInfo "1.2.0" ;
   dcterms:creator "D-LAB-5 / DigitalHome.Cloud" ;
   dcterms:license <https://opensource.org/licenses/MIT> .
 
@@ -1066,3 +1066,170 @@ dhc:smartHomeId
   rdfs:domain dhc:RealEstate ;
   rdfs:range xsd:string ;
   rdfs:comment "Tenant partition key. Format: {country}-{zip}-{street3}{number}-{nn} e.g. DE-80331-MAR12-01."@en .
+
+
+# ────────────────────────────────────────────────────────────
+# v1.2.0 — Postal address properties on RealEstate
+# Sourced from map provider (geocoded)
+# ────────────────────────────────────────────────────────────
+
+dhc:country
+  a owl:DatatypeProperty ;
+  rdfs:label "Country"@en ;
+  rdfs:label "Land"@de ;
+  rdfs:label "Pays"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "ISO 3166-1 alpha-2 country code."@en ;
+  dhc:designView "spatial" .
+
+dhc:postalCode
+  a owl:DatatypeProperty ;
+  rdfs:label "Postal code"@en ;
+  rdfs:label "Postleitzahl"@de ;
+  rdfs:label "Code postal"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  dhc:designView "spatial" .
+
+dhc:streetName
+  a owl:DatatypeProperty ;
+  rdfs:label "Street name"@en ;
+  rdfs:label "Straßenname"@de ;
+  rdfs:label "Nom de rue"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  dhc:designView "spatial" .
+
+dhc:streetNumber
+  a owl:DatatypeProperty ;
+  rdfs:label "Street number"@en ;
+  rdfs:label "Hausnummer"@de ;
+  rdfs:label "Numéro"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "String to accommodate '12a', '12-14', etc."@en ;
+  dhc:designView "spatial" .
+
+dhc:locality
+  a owl:DatatypeProperty ;
+  rdfs:label "Locality"@en ;
+  rdfs:label "Ort"@de ;
+  rdfs:label "Localité"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "City / town."@en ;
+  dhc:designView "spatial" .
+
+dhc:adminRegion
+  a owl:DatatypeProperty ;
+  rdfs:label "Administrative region"@en ;
+  rdfs:label "Verwaltungsregion"@de ;
+  rdfs:label "Région administrative"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "State, canton, Land, région."@en ;
+  dhc:designView "spatial" .
+
+dhc:formattedAddress
+  a owl:DatatypeProperty ;
+  rdfs:label "Formatted address"@en ;
+  rdfs:label "Formatierte Adresse"@de ;
+  rdfs:label "Adresse formatée"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Provider-canonical single-line address for display."@en ;
+  dhc:designView "spatial" .
+
+
+# ────────────────────────────────────────────────────────────
+# v1.2.0 — Geocoordinates (WGS84)
+# ────────────────────────────────────────────────────────────
+
+dhc:latitude
+  a owl:DatatypeProperty ;
+  rdfs:label "Latitude"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:decimal ;
+  dhc:designView "spatial" .
+
+dhc:longitude
+  a owl:DatatypeProperty ;
+  rdfs:label "Longitude"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:decimal ;
+  dhc:designView "spatial" .
+
+
+# ────────────────────────────────────────────────────────────
+# v1.2.0 — Provider-scoped external reference
+# ────────────────────────────────────────────────────────────
+
+dhc:placeId
+  a owl:DatatypeProperty ;
+  rdfs:label "Place ID"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Map provider's stable place identifier."@en ;
+  dhc:designView "spatial" .
+
+dhc:placeIdProvider
+  a owl:DatatypeProperty ;
+  rdfs:label "Place ID provider"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Provider: 'google' | 'amazon-location' | 'manual'."@en ;
+  dhc:designView "spatial" .
+
+dhc:geocodeVerified
+  a owl:DatatypeProperty ;
+  rdfs:label "Geocode verified"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:boolean ;
+  rdfs:comment "True if lat/lng come from a provider geocode call."@en ;
+  dhc:designView "spatial" .
+
+
+# ────────────────────────────────────────────────────────────
+# v1.2.0 — Lifecycle and flag properties
+# ────────────────────────────────────────────────────────────
+
+dhc:isDemo
+  a owl:DatatypeProperty ;
+  rdfs:label "Is demo"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:boolean .
+
+dhc:creationStatus
+  a owl:DatatypeProperty ;
+  rdfs:label "Creation status"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "One of: draft | active | archived."@en .
+
+dhc:createdAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Created at"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:dateTime .
+
+dhc:updatedAt
+  a owl:DatatypeProperty ;
+  rdfs:label "Updated at"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:dateTime .
+
+dhc:createdBy
+  a owl:ObjectProperty ;
+  rdfs:label "Created by"@en ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range dhc:Agent .
+
+dhc:preferredLanguage
+  a owl:DatatypeProperty ;
+  rdfs:label "Preferred language"@en ;
+  rdfs:label "Bevorzugte Sprache"@de ;
+  rdfs:label "Langue préférée"@fr ;
+  rdfs:domain dhc:RealEstate ;
+  rdfs:range xsd:string ;
+  rdfs:comment "BCP-47 tag: 'en', 'de', 'fr'."@en .

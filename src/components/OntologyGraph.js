@@ -1,4 +1,6 @@
 import * as React from "react";
+import { useTranslation } from "gatsby-plugin-react-i18next";
+import { pickLabel } from "../utils/i18nLabel";
 
 const VIEW_COLORS = {
   spatial: "#22c55e",
@@ -12,15 +14,36 @@ const VIEW_COLORS = {
 };
 const DEFAULT_COLOR = "#e5e7eb";
 
-const LINK_STYLES = {
-  subClassOf: { color: "#64748b", width: 1.5, particles: 2, particleColor: "#94a3b8", dash: null },
-  objectProperty: { color: "#38bdf8", width: 1.2, particles: 2, particleColor: "#38bdf8", dash: null },
-  domain: { color: "#22c55e88", width: 0.6, particles: 0, particleColor: null, dash: [2, 2] },
-  range: { color: "#f59e0b88", width: 0.6, particles: 0, particleColor: null, dash: [2, 2] },
+const SUBCLASS_STYLE = {
+  color: "#64748b",
+  width: 1.5,
+  particles: 2,
+  particleColor: "#94a3b8",
+  dash: null,
 };
-const DEFAULT_LINK_STYLE = { color: "#38bdf8", width: 0.8, particles: 0, particleColor: null, dash: null };
+const OBJECT_STYLE = {
+  color: "#38bdf8",
+  width: 1.2,
+  particles: 2,
+  particleColor: "#38bdf8",
+  dash: null,
+};
+const ENUM_STYLE = {
+  color: "#a3a3a344",
+  width: 0.6,
+  particles: 0,
+  particleColor: null,
+  dash: [2, 2],
+};
+
+function linkStyle(link) {
+  if (link.property === "rdfs:subClassOf") return SUBCLASS_STYLE;
+  return OBJECT_STYLE;
+}
 
 const OntologyGraph = ({ graphData, showProperties, visibleViews, onNodeClick, selectedNode }) => {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || "en";
   const containerRef = React.useRef(null);
   const graphRef = React.useRef(null);
   const ForceGraph3DRef = React.useRef(null);
@@ -39,33 +62,48 @@ const OntologyGraph = ({ graphData, showProperties, visibleViews, onNodeClick, s
     return () => { cancelled = true; };
   }, []);
 
-  // Filter nodes based on visibility settings
   const processedData = React.useMemo(() => {
     if (!graphData) return { nodes: [], links: [] };
 
-    const isPropertyType = (type) => type === "objectProperty" || type === "datatypeProperty";
-
     const nodes = graphData.nodes
       .filter((n) => {
-        if (!showProperties && isPropertyType(n.type)) return false;
-        if (visibleViews && n.view && !visibleViews.has(n.view)) return false;
+        if (n.type === "class") {
+          return !visibleViews || !n.designView || visibleViews.has(n.designView);
+        }
+        // Enum instances follow the visibility of the class they belong to.
+        if (n.type === "enumInstance") {
+          const parent = graphData.nodes.find((x) => x.id === n.ofClass);
+          return !parent || !parent.designView || !visibleViews || visibleViews.has(parent.designView);
+        }
         return true;
       })
       .map((n) => ({
         ...n,
-        _color: VIEW_COLORS[n.view] || DEFAULT_COLOR,
+        _label: pickLabel(n.label, lang) || n.id,
+        _color: n.type === "class"
+          ? VIEW_COLORS[n.designView] || DEFAULT_COLOR
+          : "#a3a3a3",
         _size: n.type === "class" ? 8 : 4,
       }));
 
     const nodeIds = new Set(nodes.map((n) => n.id));
-    const links = graphData.links.filter(
-      (l) => nodeIds.has(l.source?.id || l.source) && nodeIds.has(l.target?.id || l.target)
-    ).map((l) => ({ ...l }));
+    const links = graphData.links
+      .filter((l) => {
+        const src = l.source?.id || l.source;
+        const tgt = l.target?.id || l.target;
+        if (!nodeIds.has(src) || !nodeIds.has(tgt)) return false;
+        // Subclass links always render; ObjectProperty links toggle via showProperties.
+        if (l.property !== "rdfs:subClassOf" && !showProperties) return false;
+        return true;
+      })
+      .map((l) => ({
+        ...l,
+        _label: pickLabel(l.label, lang) || l.property,
+      }));
 
     return { nodes, links };
-  }, [graphData, showProperties, visibleViews]);
+  }, [graphData, showProperties, visibleViews, lang]);
 
-  // Camera focus on selected node
   React.useEffect(() => {
     if (!selectedNode || !graphRef.current) return;
     const node = processedData.nodes.find((n) => n.id === selectedNode);
@@ -88,28 +126,26 @@ const OntologyGraph = ({ graphData, showProperties, visibleViews, onNodeClick, s
 
   const ForceGraph3D = ForceGraph3DRef.current;
 
-  const getLinkStyle = (link) => LINK_STYLES[link.type] || DEFAULT_LINK_STYLE;
-
   return (
     <div ref={containerRef} className="dhc-graph-container">
       <ForceGraph3D
         ref={graphRef}
         graphData={processedData}
         backgroundColor="#020617"
-        nodeLabel={(node) => `${node.label} (${node.type})`}
+        nodeLabel={(node) => `${node._label} (${node.type})`}
         nodeVal={(node) => node._size}
         nodeColor={() => "#000000"}
         nodeOpacity={0}
         nodeResolution={16}
-        linkColor={(link) => getLinkStyle(link).color}
-        linkWidth={(link) => getLinkStyle(link).width}
+        linkColor={(link) => linkStyle(link).color}
+        linkWidth={(link) => linkStyle(link).width}
         linkOpacity={0.6}
-        linkLineDash={(link) => getLinkStyle(link).dash}
-        linkDirectionalParticles={(link) => getLinkStyle(link).particles}
+        linkLineDash={(link) => linkStyle(link).dash}
+        linkDirectionalParticles={(link) => linkStyle(link).particles}
         linkDirectionalParticleWidth={1.5}
         linkDirectionalParticleSpeed={0.005}
-        linkDirectionalParticleColor={(link) => getLinkStyle(link).particleColor}
-        linkLabel={(link) => link.label}
+        linkDirectionalParticleColor={(link) => linkStyle(link).particleColor}
+        linkLabel={(link) => link._label}
         onNodeClick={(node) => {
           if (onNodeClick) onNodeClick(node.id);
         }}
@@ -124,14 +160,9 @@ const OntologyGraph = ({ graphData, showProperties, visibleViews, onNodeClick, s
           if (typeof window === "undefined") return null;
           const THREE = require("three");
 
-          let geometry;
-          if (node.type === "class") {
-            geometry = new THREE.SphereGeometry(5, 16, 16);
-          } else if (node.type === "objectProperty") {
-            geometry = new THREE.OctahedronGeometry(4);
-          } else {
-            geometry = new THREE.BoxGeometry(5, 5, 5);
-          }
+          const geometry = node.type === "class"
+            ? new THREE.SphereGeometry(5, 16, 16)
+            : new THREE.BoxGeometry(4, 4, 4);
 
           const material = new THREE.MeshLambertMaterial({
             color: node._color,
@@ -142,7 +173,7 @@ const OntologyGraph = ({ graphData, showProperties, visibleViews, onNodeClick, s
 
           const sprite = new THREE.Sprite(
             new THREE.SpriteMaterial({
-              map: createTextTexture(node.label, node._color, false),
+              map: createTextTexture(node._label, node._color, false),
               transparent: true,
               depthWrite: false,
             })

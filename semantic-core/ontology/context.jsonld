@@ -105,6 +105,25 @@
     "batteryCapacity": { "@id": "dhc:batteryCapacity", "@type": "xsd:decimal" },
     "chargingPower": { "@id": "dhc:chargingPower", "@type": "xsd:decimal" },
     "chargingType": "dhc:chargingType",
-    "vehicleRange": { "@id": "dhc:vehicleRange", "@type": "xsd:decimal" }
+    "vehicleRange": { "@id": "dhc:vehicleRange", "@type": "xsd:decimal" },
+
+    "country": "dhc:country",
+    "postalCode": "dhc:postalCode",
+    "streetName": "dhc:streetName",
+    "streetNumber": "dhc:streetNumber",
+    "locality": "dhc:locality",
+    "adminRegion": "dhc:adminRegion",
+    "formattedAddress": "dhc:formattedAddress",
+    "latitude": { "@id": "dhc:latitude", "@type": "xsd:decimal" },
+    "longitude": { "@id": "dhc:longitude", "@type": "xsd:decimal" },
+    "placeId": "dhc:placeId",
+    "placeIdProvider": "dhc:placeIdProvider",
+    "geocodeVerified": { "@id": "dhc:geocodeVerified", "@type": "xsd:boolean" },
+    "isDemo": { "@id": "dhc:isDemo", "@type": "xsd:boolean" },
+    "creationStatus": "dhc:creationStatus",
+    "createdAt": { "@id": "dhc:createdAt", "@type": "xsd:dateTime" },
+    "updatedAt": { "@id": "dhc:updatedAt", "@type": "xsd:dateTime" },
+    "createdBy": { "@id": "dhc:createdBy", "@type": "@id" },
+    "preferredLanguage": "dhc:preferredLanguage"
   }
 }

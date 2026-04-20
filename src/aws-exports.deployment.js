@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Environment-driven aws-exports for deployment.
-// Same Cognito + AppSync backend as the portal — shared backend, frontend-only consumer.
+// Generated from src/aws-exports.js by scripts/generate-aws-config-from-master.js
 
 const getScopes = () => {
   const raw = process.env.GATSBY_COGNITO_OAUTH_SCOPES;

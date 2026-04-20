@@ -1,0 +1,22 @@
+/**
+ * Opaque version tag for the Modeler's ingestion + generator pipeline.
+ *
+ * Bump this whenever the ingestion/generator output format changes in a
+ * way that makes previously-built workdir artifacts incompatible. The
+ * cache-hit decision in OntologyContext.fetchOntology compares this
+ * value against the one stored in build-meta.json; a mismatch forces a
+ * full rebuild even if the source commit SHA is unchanged.
+ */
+export const PIPELINE_VERSION = "v2-1";
+
+/**
+ * Pure decision for whether a cached workdir can satisfy a fetch.
+ * Exposed so unit tests can exercise the logic without touching S3.
+ */
+export function isCacheHit({ meta, upstreamSha, pipelineVersion }) {
+  if (!meta) return false;
+  if (!upstreamSha) return false;
+  if (meta.commitSha !== upstreamSha) return false;
+  if (meta.pipelineVersion !== pipelineVersion) return false;
+  return true;
+}
