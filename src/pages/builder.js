@@ -136,9 +136,6 @@ const BuilderPage = () => {
       const result = await promoteWorkdir({
         branch,
         version: workdirMeta.version,
-        contextJsonld,
-        manifest: null,
-        moduleTtls: null,
       });
 
       if (result.errors.length > 0) {

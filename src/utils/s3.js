@@ -78,20 +78,15 @@ export async function fetchOntologyMeta(version) {
 
 /**
  * Publish ontology artifacts to S3 at both v{VERSION}/ and latest/.
- * Only publishes JSON artifacts available as static imports (Option B).
- *
- * @param {object} params
- * @param {string} params.version — e.g. "1.1.0"
- * @param {object} params.graphJson — ontology-graph.json content
- * @param {object} params.blocklyBlocks — blockly-blocks.json content
- * @param {object} params.blocklyToolbox — blockly-toolbox.json content
- * @param {function} params.onProgress — callback(uploaded, total)
+ * v2 adds cbox-registry.json and context.jsonld.
  */
 export async function publishOntologyArtifacts({
   version,
   graphJson,
   blocklyBlocks,
   blocklyToolbox,
+  cboxRegistry,
+  contextJsonld,
   onProgress,
 }) {
   const artifacts = [
@@ -99,6 +94,21 @@ export async function publishOntologyArtifacts({
     { name: "blockly-blocks.json", data: blocklyBlocks, contentType: "application/json" },
     { name: "blockly-toolbox.json", data: blocklyToolbox, contentType: "application/json" },
   ];
+  if (cboxRegistry) {
+    artifacts.push({
+      name: "cbox-registry.json",
+      data: cboxRegistry,
+      contentType: "application/json",
+    });
+  }
+  if (contextJsonld) {
+    artifacts.push({
+      name: "context.jsonld",
+      data: contextJsonld,
+      raw: true,
+      contentType: "application/ld+json",
+    });
+  }
 
   const prefixes = [`${S3_PREFIX}/v${version}`, `${S3_PREFIX}/latest`];
   const total = artifacts.length * prefixes.length;
@@ -110,7 +120,9 @@ export async function publishOntologyArtifacts({
       try {
         await uploadData({
           path: `public/${prefix}/${artifact.name}`,
-          data: JSON.stringify(artifact.data, null, 2),
+          data: artifact.raw
+            ? artifact.data
+            : JSON.stringify(artifact.data, null, 2),
           options: { contentType: artifact.contentType },
         }).result;
         uploaded++;
@@ -216,108 +228,45 @@ export async function fetchWorkdirArtifact(branch, fileName) {
 /**
  * Promote workdir artifacts to a versioned release + latest.
  * Reads from workdir/{branch}/ → copies to v{version}/ and latest/.
+ *
+ * v2 artifacts: blockly-blocks.json, blockly-toolbox.json,
+ * ontology-graph.json, cbox-registry.json, context.jsonld.
  */
-export async function promoteWorkdir({
-  branch,
-  version,
-  contextJsonld,
-  manifest,
-  moduleTtls,
-  onProgress,
-}) {
+export async function promoteWorkdir({ branch, version, onProgress }) {
   const workdirPrefix = `${S3_PREFIX}/workdir/${branch}`;
   const versionedPrefix = `${S3_PREFIX}/v${version}`;
   const latestPrefix = `${S3_PREFIX}/latest`;
 
-  const jsonFiles = [
-    "blockly-blocks.json",
-    "blockly-toolbox.json",
-    "ontology-graph.json",
+  const files = [
+    { name: "blockly-blocks.json", contentType: "application/json" },
+    { name: "blockly-toolbox.json", contentType: "application/json" },
+    { name: "ontology-graph.json", contentType: "application/json" },
+    { name: "cbox-registry.json", contentType: "application/json" },
+    { name: "context.jsonld", contentType: "application/ld+json" },
   ];
 
-  const totalSteps =
-    jsonFiles.length * 2 +
-    (contextJsonld ? 2 : 0) +
-    (manifest ? 2 : 0) +
-    (moduleTtls ? moduleTtls.length * 2 : 0);
+  const totalSteps = files.length * 2;
   let done = 0;
-
   const errors = [];
 
-  for (const fileName of jsonFiles) {
+  for (const file of files) {
     try {
       const result = await downloadData({
-        path: `public/${workdirPrefix}/${fileName}`,
+        path: `public/${workdirPrefix}/${file.name}`,
       }).result;
       const body = await result.body.text();
 
-      await uploadData({
-        path: `public/${versionedPrefix}/${fileName}`,
-        data: body,
-        options: { contentType: "application/json" },
-      }).result;
-      done++;
-
-      await uploadData({
-        path: `public/${latestPrefix}/${fileName}`,
-        data: body,
-        options: { contentType: "application/json" },
-      }).result;
-      done++;
-    } catch (err) {
-      errors.push({ file: fileName, error: err.message });
-    }
-    if (onProgress) onProgress(done, totalSteps);
-  }
-
-  if (contextJsonld) {
-    try {
       for (const prefix of [versionedPrefix, latestPrefix]) {
         await uploadData({
-          path: `public/${prefix}/context.jsonld`,
-          data: contextJsonld,
-          options: { contentType: "application/ld+json" },
+          path: `public/${prefix}/${file.name}`,
+          data: body,
+          options: { contentType: file.contentType },
         }).result;
         done++;
+        if (onProgress) onProgress(done, totalSteps);
       }
     } catch (err) {
-      errors.push({ file: "context.jsonld", error: err.message });
-    }
-    if (onProgress) onProgress(done, totalSteps);
-  }
-
-  if (manifest) {
-    try {
-      const manifestStr = JSON.stringify(manifest, null, 2);
-      for (const prefix of [versionedPrefix, latestPrefix]) {
-        await uploadData({
-          path: `public/${prefix}/modules/module-manifest.json`,
-          data: manifestStr,
-          options: { contentType: "application/json" },
-        }).result;
-        done++;
-      }
-    } catch (err) {
-      errors.push({ file: "module-manifest.json", error: err.message });
-    }
-    if (onProgress) onProgress(done, totalSteps);
-  }
-
-  if (moduleTtls) {
-    for (const mod of moduleTtls) {
-      try {
-        for (const prefix of [versionedPrefix, latestPrefix]) {
-          await uploadData({
-            path: `public/${prefix}/modules/${mod.file}`,
-            data: mod.ttl,
-            options: { contentType: "text/turtle" },
-          }).result;
-          done++;
-        }
-      } catch (err) {
-        errors.push({ file: mod.file, error: err.message });
-      }
-      if (onProgress) onProgress(done, totalSteps);
+      errors.push({ file: file.name, error: err.message });
     }
   }
 
