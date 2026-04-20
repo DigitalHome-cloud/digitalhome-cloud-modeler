@@ -18,6 +18,7 @@ const ConfigPage = () => {
     commitSha,
     tbox,
     cbox,
+    cacheStatus,
   } = useOntology();
 
   const [s3Latest, setS3Latest] = useState(null);
@@ -105,6 +106,29 @@ const ConfigPage = () => {
           {error && (
             <div className="dhc-error-message">
               {t("config.fetchError")}: {error}
+            </div>
+          )}
+
+          {fetchState === "ready" && (
+            <div
+              style={{
+                marginTop: "0.75rem",
+                color:
+                  cacheStatus === "hit"
+                    ? "#22c55e"
+                    : cacheStatus === "miss" || cacheStatus === "forced-rebuild"
+                      ? "#f59e0b"
+                      : "#94a3b8",
+                fontSize: "0.875rem",
+              }}
+            >
+              {cacheStatus === "hit"
+                ? "Cache hit — build skipped."
+                : cacheStatus === "miss"
+                  ? "Rebuilt from source."
+                  : cacheStatus === "forced-rebuild"
+                    ? "Forced rebuild."
+                    : null}
             </div>
           )}
         </div>

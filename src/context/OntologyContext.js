@@ -1,9 +1,14 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { fetchOntologyChain } from "../utils/github";
+import { fetchBranchCommitSha, fetchOntologyChain } from "../utils/github";
 import { parseGraphs } from "../utils/ttlParser";
 import { generateBlocklyArtifacts } from "../utils/blocklyGenerator";
 import { buildOntologyGraph } from "../utils/graphGenerator";
 import { buildCboxRegistry } from "../utils/cboxRegistryGenerator";
+import {
+  fetchWorkdirMeta,
+  fetchWorkdirArtifact,
+} from "../utils/s3";
+import { PIPELINE_VERSION } from "../utils/buildPipeline";
 
 const OntologyContext = createContext(null);
 
@@ -29,6 +34,9 @@ export const OntologyProvider = ({ children }) => {
   const [blocklyArtifacts, setBlocklyArtifacts] = useState(null);
   const [cboxRegistry, setCboxRegistry] = useState(null);
 
+  // Cache telemetry — exposed for the Config page's hit/miss indicator.
+  const [cacheStatus, setCacheStatus] = useState("idle");
+
   const selectBranch = useCallback((newBranch) => {
     setBranch(newBranch);
     if (typeof window !== "undefined") {
@@ -37,12 +45,59 @@ export const OntologyProvider = ({ children }) => {
   }, []);
 
   const fetchOntology = useCallback(
-    async (targetBranch) => {
+    async (targetBranch, opts = {}) => {
       const br = targetBranch || branch;
+      const force = opts.force === true;
       setFetchState("loading");
       setError(null);
+      setCacheStatus("checking");
 
       try {
+        // Step 1 — resolve the upstream commit SHA (single API call).
+        const upstreamSha = await fetchBranchCommitSha(br);
+
+        // Step 2 — see whether a matching workdir already exists on S3.
+        if (!force) {
+          const meta = await fetchWorkdirMeta(br).catch(() => null);
+          if (
+            meta &&
+            meta.commitSha === upstreamSha &&
+            meta.pipelineVersion === PIPELINE_VERSION
+          ) {
+            try {
+              const [graph, blocks, toolbox, registry] = await Promise.all([
+                fetchWorkdirArtifact(br, "ontology-graph.json"),
+                fetchWorkdirArtifact(br, "blockly-blocks.json"),
+                fetchWorkdirArtifact(br, "blockly-toolbox.json"),
+                fetchWorkdirArtifact(br, "cbox-registry.json").catch(
+                  () => null
+                ),
+              ]);
+              setCommitSha(upstreamSha);
+              setOntologyGraph(graph);
+              setBlocklyArtifacts({ blocks, toolbox });
+              setCboxRegistry(registry);
+              // T-Box / C-Box views are absent on a cache hit — consumers
+              // that need the raw RDF must force a rebuild.
+              setTbox({ version: meta.version, classes: [], objectProperties: [], dataProperties: [], enumInstancesByClass: {} });
+              setCbox([]);
+              setStore(null);
+              setContextJsonld(null);
+
+              selectBranch(br);
+              setCacheStatus("hit");
+              setFetchState("ready");
+              return;
+            } catch (cacheErr) {
+              console.warn(
+                "[OntologyContext] Cache hit but artifact fetch failed — rebuilding.",
+                cacheErr
+              );
+            }
+          }
+        }
+
+        // Step 3 — cache miss (or forced): fetch + parse + generate.
         const chain = await fetchOntologyChain(br);
 
         const tboxTtls = [
@@ -80,10 +135,12 @@ export const OntologyProvider = ({ children }) => {
         );
 
         selectBranch(br);
+        setCacheStatus(force ? "forced-rebuild" : "miss");
         setFetchState("ready");
       } catch (err) {
         console.error("[OntologyContext] Fetch failed:", err);
         setError(err.message);
+        setCacheStatus("error");
         setFetchState("error");
       }
     },
@@ -116,6 +173,9 @@ export const OntologyProvider = ({ children }) => {
     ontologyGraph,
     blocklyArtifacts,
     cboxRegistry,
+
+    // cache telemetry
+    cacheStatus,
 
     // legacy compat shims
     meta,
