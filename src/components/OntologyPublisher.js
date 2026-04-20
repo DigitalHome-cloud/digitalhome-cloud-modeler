@@ -4,18 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import {
   listOntologyVersions,
   fetchOntologyMeta,
-  publishOntologyArtifacts,
+  rollbackToVersion,
 } from "../utils/s3";
-import graphData from "../data/ontology-graph.json";
-import blocklyBlocks from "../data/blockly-blocks.json";
-import blocklyToolbox from "../data/blockly-toolbox.json";
-
-function formatBytes(bytes) {
-  if (!bytes) return "—";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 function formatDate(d) {
   if (!d) return "—";
@@ -25,34 +15,29 @@ function formatDate(d) {
 const OntologyPublisher = () => {
   const { t } = useTranslation();
   const { hasGroup } = useAuth();
+
   const isAdmin = hasGroup("dhc-admins");
 
-  // S3 browser state
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedVersion, setExpandedVersion] = useState(null);
   const [latestMeta, setLatestMeta] = useState(null);
 
-  // Publish state
-  const [publishing, setPublishing] = useState(false);
-  const [publishProgress, setPublishProgress] = useState({ uploaded: 0, total: 0 });
-  const [publishResult, setPublishResult] = useState(null);
+  const [rollbackState, setRollbackState] = useState("idle");
+  const [rollbackMessage, setRollbackMessage] = useState("");
 
-  const localVersion = graphData.meta?.version;
-
-  const loadVersions = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listOntologyVersions();
+      const [data, meta] = await Promise.all([
+        listOntologyVersions(),
+        fetchOntologyMeta("latest"),
+      ]);
       setVersions(data);
-
-      // Fetch latest meta to show which version it mirrors
-      const meta = await fetchOntologyMeta("latest");
       setLatestMeta(meta);
     } catch (err) {
-      console.warn("[Publisher] Failed to list versions:", err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -60,30 +45,27 @@ const OntologyPublisher = () => {
   }, []);
 
   useEffect(() => {
-    loadVersions();
-  }, [loadVersions]);
+    loadData();
+  }, [loadData]);
 
-  const handlePublish = async () => {
-    setPublishing(true);
-    setPublishResult(null);
-    setPublishProgress({ uploaded: 0, total: 0 });
+  const handleRollback = async (version) => {
+    setRollbackState("rollingBack");
+    setRollbackMessage("");
 
     try {
-      const result = await publishOntologyArtifacts({
-        version: localVersion,
-        graphJson: graphData,
-        blocklyBlocks,
-        blocklyToolbox,
-        onProgress: (uploaded, total) =>
-          setPublishProgress({ uploaded, total }),
-      });
-      setPublishResult(result);
-      // Refresh the browser
-      await loadVersions();
+      const result = await rollbackToVersion({ version });
+
+      if (result.errors.length > 0) {
+        setRollbackState("error");
+        setRollbackMessage(result.errors.map((e) => e.file).join(", "));
+      } else {
+        setRollbackState("done");
+        setRollbackMessage(t("publish.rollbackDone", { version }));
+        await loadData();
+      }
     } catch (err) {
-      setPublishResult({ uploaded: 0, total: 0, errors: [{ error: err.message }] });
-    } finally {
-      setPublishing(false);
+      setRollbackState("error");
+      setRollbackMessage(err.message);
     }
   };
 
@@ -93,22 +75,19 @@ const OntologyPublisher = () => {
 
   const latestDeployedVersion = latestMeta?.meta?.version;
 
-  const publishArtifacts = [
-    { name: "ontology-graph.json", desc: "Ontology graph with classes, properties, and links" },
-    { name: "blockly-blocks.json", desc: "Block definitions for Blockly workspace" },
-    { name: "blockly-toolbox.json", desc: "Toolbox configuration for Blockly workspace" },
-  ];
+  const versionedReleases = versions.filter(
+    (v) => v.version !== "latest" && !v.version.startsWith("workdir")
+  );
 
   return (
     <div className="dhc-publish">
-      {/* S3 Browser Section */}
       <div className="dhc-publish-section">
         <div className="dhc-publish-section-header">
-          <h2>{t("publish.s3Title")}</h2>
+          <h2>{t("publish.published")}</h2>
           <button
             type="button"
-            className="dhc-button-secondary"
-            onClick={loadVersions}
+            className="dhc-btn dhc-btn--sm"
+            onClick={loadData}
             disabled={loading}
           >
             {t("publish.refresh")}
@@ -119,15 +98,13 @@ const OntologyPublisher = () => {
           <p className="dhc-library-notice">{t("publish.loading")}</p>
         )}
 
-        {error && (
-          <p className="dhc-library-notice dhc-library-error">{error}</p>
+        {error && <p className="dhc-error-message">{error}</p>}
+
+        {!loading && versionedReleases.length === 0 && (
+          <p className="dhc-info-message">{t("publish.noVersions")}</p>
         )}
 
-        {!loading && !error && versions.length === 0 && (
-          <p className="dhc-library-notice">{t("publish.noVersions")}</p>
-        )}
-
-        {!loading && versions.length > 0 && (
+        {!loading && versionedReleases.length > 0 && (
           <div className="dhc-library-table-wrap">
             <table className="dhc-library-table">
               <thead>
@@ -135,10 +112,11 @@ const OntologyPublisher = () => {
                   <th>{t("publish.version")}</th>
                   <th>{t("publish.fileCount")}</th>
                   <th>{t("publish.lastModified")}</th>
+                  <th aria-label="Actions"></th>
                 </tr>
               </thead>
               <tbody>
-                {versions.map((v) => (
+                {versionedReleases.map((v) => (
                   <React.Fragment key={v.version}>
                     <tr
                       onClick={() => toggleExpand(v.version)}
@@ -148,18 +126,38 @@ const OntologyPublisher = () => {
                         <span className="dhc-publish-version-badge">
                           {v.version}
                         </span>
-                        {v.version === "latest" && latestDeployedVersion && (
-                          <span className="dhc-publish-version-badge dhc-publish-version-badge--alias">
-                            = v{latestDeployedVersion}
-                          </span>
-                        )}
+                        {latestDeployedVersion &&
+                          v.version === `v${latestDeployedVersion}` && (
+                            <span className="dhc-publish-version-badge dhc-publish-version-badge--alias">
+                              = latest
+                            </span>
+                          )}
                       </td>
                       <td>{v.fileCount}</td>
                       <td>{formatDate(v.lastModified)}</td>
+                      <td>
+                        {isAdmin &&
+                          latestDeployedVersion &&
+                          v.version !== `v${latestDeployedVersion}` && (
+                            <button
+                              type="button"
+                              className="dhc-btn dhc-btn--sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRollback(v.version.replace(/^v/, ""));
+                              }}
+                              disabled={rollbackState === "rollingBack"}
+                            >
+                              {t("publish.rollback", {
+                                version: v.version.replace(/^v/, ""),
+                              })}
+                            </button>
+                          )}
+                      </td>
                     </tr>
                     {expandedVersion === v.version && (
                       <tr>
-                        <td colSpan="3" style={{ padding: 0 }}>
+                        <td colSpan="4" style={{ padding: 0 }}>
                           <div className="dhc-publish-file-list">
                             {v.files.map((f) => (
                               <div
@@ -168,9 +166,6 @@ const OntologyPublisher = () => {
                               >
                                 <span className="dhc-publish-file-name">
                                   {f.fileName}
-                                </span>
-                                <span className="dhc-publish-file-size">
-                                  {formatBytes(f.size)}
                                 </span>
                                 <span className="dhc-publish-file-date">
                                   {formatDate(f.lastModified)}
@@ -189,92 +184,22 @@ const OntologyPublisher = () => {
         )}
       </div>
 
-      {/* Publish Controls (admin-only) */}
       {!isAdmin && (
-        <p className="dhc-library-notice" style={{ marginTop: "1.5rem" }}>
-          {t("publish.adminRequired")}
+        <p className="dhc-info-message" style={{ marginTop: "1rem" }}>
+          {t("publish.adminOnly")}
         </p>
       )}
 
-      {isAdmin && (
-        <div className="dhc-publish-section" style={{ marginTop: "1.5rem" }}>
-          <h2>{t("publish.publishTitle")}</h2>
-
-          <div className="dhc-publish-version-compare">
-            <div>
-              <span className="dhc-inspector-label">
-                {t("publish.localVersion")}
-              </span>
-              <span className="dhc-publish-version-badge">
-                v{localVersion}
-              </span>
-            </div>
-            <div>
-              <span className="dhc-inspector-label">
-                {t("publish.deployedVersion")}
-              </span>
-              <span className="dhc-publish-version-badge">
-                {latestDeployedVersion
-                  ? `v${latestDeployedVersion}`
-                  : "—"}
-              </span>
-            </div>
-          </div>
-
-          <div className="dhc-publish-artifact-list">
-            {publishArtifacts.map((a) => (
-              <div key={a.name} className="dhc-publish-file-row">
-                <span className="dhc-publish-file-check">&#10003;</span>
-                <span className="dhc-publish-file-name">{a.name}</span>
-                <span className="dhc-publish-file-desc">{a.desc}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: "1rem" }}>
-            <button
-              type="button"
-              className="dhc-button-primary"
-              onClick={handlePublish}
-              disabled={publishing}
-            >
-              {publishing ? t("publish.uploading") : t("publish.publishButton")}
-            </button>
-          </div>
-
-          {publishing && publishProgress.total > 0 && (
-            <div className="dhc-publish-progress">
-              <div
-                className="dhc-publish-progress-bar"
-                style={{
-                  width: `${(publishProgress.uploaded / publishProgress.total) * 100}%`,
-                }}
-              />
-              <span className="dhc-publish-progress-label">
-                {publishProgress.uploaded} / {publishProgress.total}
-              </span>
-            </div>
-          )}
-
-          {publishResult && !publishing && (
-            <div
-              className={
-                publishResult.errors.length > 0
-                  ? "dhc-publish-status dhc-publish-status--error"
-                  : "dhc-publish-status dhc-publish-status--success"
-              }
-            >
-              {publishResult.errors.length > 0 ? (
-                <>
-                  {t("publish.error")}: {publishResult.errors.map((e) => e.error).join(", ")}
-                </>
-              ) : (
-                <>
-                  {t("publish.success")} ({publishResult.uploaded} files)
-                </>
-              )}
-            </div>
-          )}
+      {rollbackMessage && (
+        <div
+          className={
+            rollbackState === "error"
+              ? "dhc-publish-status dhc-publish-status--error"
+              : "dhc-publish-status dhc-publish-status--success"
+          }
+          style={{ marginTop: "1rem" }}
+        >
+          {rollbackMessage}
         </div>
       )}
     </div>

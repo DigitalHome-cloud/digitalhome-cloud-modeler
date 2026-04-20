@@ -26,11 +26,14 @@ const Header = () => {
 
         <nav className="dhc-nav">
           <div className="dhc-nav-group">
-            <Link to="/" className="dhc-nav-link">
-              {t("nav.modeler")}
+            <Link to="/config/" className="dhc-nav-link">
+              {t("nav.config")}
             </Link>
-            <Link to="/library/" className="dhc-nav-link">
-              {t("nav.library")}
+            <Link to="/" className="dhc-nav-link">
+              {t("nav.model")}
+            </Link>
+            <Link to="/builder/" className="dhc-nav-link">
+              {t("nav.builder")}
             </Link>
             <Link to="/publish/" className="dhc-nav-link">
               {t("nav.publish")}
@@ -41,13 +44,10 @@ const Header = () => {
           </div>
 
           <div className="dhc-nav-group dhc-nav-auth">
-            {authState === "demo" && (
-              <>
-                <span className="dhc-nav-pill">DEMO</span>
-                <Link to="/signin/" className="dhc-nav-link">
-                  Sign In
-                </Link>
-              </>
+            {!isAuthenticated && (
+              <Link to="/signin/" className="dhc-nav-link">
+                Sign In
+              </Link>
             )}
 
             {isAuthenticated && (
