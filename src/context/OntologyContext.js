@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { fetchOntologyChain } from "../utils/github";
 import { parseGraphs } from "../utils/ttlParser";
+import { generateBlocklyArtifacts } from "../utils/blocklyGenerator";
+import { buildOntologyGraph } from "../utils/graphGenerator";
+import { buildCboxRegistry } from "../utils/cboxRegistryGenerator";
 
 const OntologyContext = createContext(null);
 
@@ -22,9 +25,9 @@ export const OntologyProvider = ({ children }) => {
   const [cbox, setCbox] = useState(null);
   const [contextJsonld, setContextJsonld] = useState(null);
 
-  // Phase-B stubs for downstream pages — Phase C replaces with real generators.
   const [ontologyGraph, setOntologyGraph] = useState(null);
   const [blocklyArtifacts, setBlocklyArtifacts] = useState(null);
+  const [cboxRegistry, setCboxRegistry] = useState(null);
 
   const selectBranch = useCallback((newBranch) => {
     setBranch(newBranch);
@@ -63,9 +66,18 @@ export const OntologyProvider = ({ children }) => {
         setCommitSha(chain.commitSha);
         setContextJsonld(chain.tbox.contextJsonld);
 
-        // Phase B: no generator yet — consumers must handle nulls.
-        setOntologyGraph(null);
-        setBlocklyArtifacts(null);
+        setOntologyGraph(
+          buildOntologyGraph({ tbox: parsedTbox, cbox: parsedCbox })
+        );
+        setBlocklyArtifacts(
+          generateBlocklyArtifacts({ tbox: parsedTbox, cbox: parsedCbox })
+        );
+        setCboxRegistry(
+          buildCboxRegistry({
+            cbox: parsedCbox,
+            registryVersion: parsedTbox.version,
+          })
+        );
 
         selectBranch(br);
         setFetchState("ready");
@@ -100,10 +112,13 @@ export const OntologyProvider = ({ children }) => {
     cbox,
     contextJsonld,
 
-    // legacy/stubbed
-    meta,
+    // v2 artifacts
     ontologyGraph,
     blocklyArtifacts,
+    cboxRegistry,
+
+    // legacy compat shims
+    meta,
     rebuildBlockly,
   };
 
