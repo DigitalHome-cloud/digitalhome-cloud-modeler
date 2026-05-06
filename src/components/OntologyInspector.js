@@ -11,6 +11,8 @@ const VIEW_COLORS = {
   network: "#a855f7",
   governance: "#f97316",
   automation: "#ec4899",
+  energy: "#eab308",
+  compliance: "#a16207",
 };
 
 const TYPE_LABELS = {
