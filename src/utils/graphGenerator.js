@@ -39,6 +39,7 @@ export function buildOntologyGraph({ tbox, cbox }) {
     nodes.push({
       id: `dhc:${cls.localName}`,
       label: cls.label,
+      comment: cls.comment,
       designView: cls.designView,
       type: "class",
       superClass: cls.superClass ? `dhc:${localName(cls.superClass)}` : null,

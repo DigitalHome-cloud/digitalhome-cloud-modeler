@@ -58,9 +58,10 @@ const OntologyInspector = ({ graphData, selectedNode }) => {
       </div>
     );
   }
-
+  
   const viewColor = VIEW_COLORS[node.designView] || "#e5e7eb";
   const labelText = pickLabel(node.label, lang) || node.id;
+  const commentText = pickLabel(node.comment, lang) || node.id;
 
   return (
     <div className="dhc-panel dhc-panel--inspector">
@@ -72,6 +73,10 @@ const OntologyInspector = ({ graphData, selectedNode }) => {
         <div className="dhc-inspector-field">
           <div className="dhc-inspector-label">Label</div>
           <div className="dhc-inspector-value">{labelText}</div>
+        </div>
+        <div className="dhc-inspector-field">
+          <div className="dhc-inspector-label">Comment</div>
+          <div className="dhc-inspector-value"> {commentText}</div>
         </div>
 
         <div className="dhc-inspector-field">
